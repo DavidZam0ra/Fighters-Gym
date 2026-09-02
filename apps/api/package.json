@@ -1,0 +1,36 @@
+{
+  "name": "@fighters-gym/api",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/infrastructure/http/server.ts",
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/infrastructure/http/server.js",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "test:integration": "vitest run --config vitest.integration.config.ts",
+    "prisma:generate": "prisma generate --schema src/infrastructure/adapters/db/prisma/schema.prisma",
+    "prisma:migrate": "prisma migrate dev --schema src/infrastructure/adapters/db/prisma/schema.prisma",
+    "lint": "eslint ."
+  },
+  "dependencies": {
+    "@prisma/client": "^5.20.0",
+    "fastify": "^4.28.1",
+    "@fastify/cors": "^9.0.1",
+    "bcrypt": "^5.1.1",
+    "jose": "^5.9.6",
+    "zod": "^3.23.8",
+    "@fighters-gym/shared-types": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/bcrypt": "^5.0.2",
+    "@types/node": "^22.7.5",
+    "eslint": "^9.12.0",
+    "typescript-eslint": "^8.8.1",
+    "prisma": "^5.20.0",
+    "tsx": "^4.19.1",
+    "typescript": "^5.6.3",
+    "vitest": "^2.1.2"
+  }
+}

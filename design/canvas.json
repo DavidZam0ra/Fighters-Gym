@@ -1,0 +1,41 @@
+{
+  "pages": [
+    { "id": "page-dark", "name": "Fondo oscuro" },
+    { "id": "page-light", "name": "Fondo claro" }
+  ],
+  "artboards": [
+    { "file": "Main.dc.html", "x": -352, "y": -168, "w": 1440, "h": 4150, "title": "Landing", "page": "page-dark" },
+    { "file": "Login.dc.html", "x": 1600, "y": -1200, "w": 1440, "h": 900, "title": "Login", "page": "page-dark" },
+    { "file": "Dashboard.dc.html", "x": 1600, "y": 0, "w": 1440, "h": 900, "title": "Panel de alumnos", "page": "page-dark" },
+    { "file": "FichaAlumno.dc.html", "x": 1600, "y": 1060, "w": 1440, "h": 900, "title": "Ficha de alumno", "page": "page-dark" },
+    { "file": "DashboardHome.dc.html", "x": 1600, "y": 2120, "w": 1440, "h": 900, "title": "Dashboard (resumen)", "page": "page-dark" },
+    { "file": "Calendario.dc.html", "x": 3200, "y": 2120, "w": 1440, "h": 900, "title": "Calendario", "page": "page-dark" },
+    { "file": "Cuotas.dc.html", "x": 4800, "y": 2120, "w": 1440, "h": 900, "title": "Cuotas", "page": "page-dark" },
+    { "file": "Ajustes.dc.html", "x": 6400, "y": 2120, "w": 1440, "h": 900, "title": "Ajustes", "page": "page-dark" },
+    { "file": "ImportarAlumno.dc.html", "x": 8000, "y": 2120, "w": 1440, "h": 900, "title": "Nuevo alumno", "page": "page-dark" },
+
+    { "file": "MainLight.dc.html", "x": 0, "y": 0, "w": 1440, "h": 4150, "title": "Landing", "page": "page-light" },
+    { "file": "LoginLight.dc.html", "x": 1600, "y": -1200, "w": 1440, "h": 900, "title": "Login", "page": "page-light" },
+    { "file": "DashboardLight.dc.html", "x": 1600, "y": 0, "w": 1440, "h": 900, "title": "Panel de alumnos", "page": "page-light" },
+    { "file": "FichaAlumnoLight.dc.html", "x": 1600, "y": 1060, "w": 1440, "h": 900, "title": "Ficha de alumno", "page": "page-light" },
+    { "file": "DashboardHomeLight.dc.html", "x": 1600, "y": 2120, "w": 1440, "h": 900, "title": "Dashboard (resumen)", "page": "page-light" },
+    { "file": "CalendarioLight.dc.html", "x": 3200, "y": 2120, "w": 1440, "h": 900, "title": "Calendario", "page": "page-light" },
+    { "file": "CuotasLight.dc.html", "x": 4800, "y": 2120, "w": 1440, "h": 900, "title": "Cuotas", "page": "page-light" },
+    { "file": "AjustesLight.dc.html", "x": 6400, "y": 2120, "w": 1440, "h": 900, "title": "Ajustes", "page": "page-light" },
+    { "file": "ImportarAlumnoLight.dc.html", "x": 8000, "y": 2120, "w": 1440, "h": 900, "title": "Nuevo alumno", "page": "page-light" }
+  ],
+  "annotations": [
+    { "id": "note-landing", "x": -352, "y": -268, "w": 420, "text": "Web pública — hero, disciplinas, entrenador, horario real, tarifas y contacto. Esquinas curvas y acentos orgánicos.", "page": "page-dark" },
+    { "id": "note-login", "x": 1600, "y": -1300, "w": 420, "text": "Login — admin/profesor, sin registro público. Preparado para añadir Google más adelante.", "page": "page-dark" },
+    { "id": "note-panel", "x": 1600, "y": -100, "w": 420, "text": "Panel interno — listado de alumnos + horario del día. Datos de ejemplo. Esquinas curvas aplicadas.", "page": "page-dark" },
+    { "id": "note-ficha", "x": 1600, "y": 960, "w": 420, "text": "Ficha de alumno — cuotas y asistencia. Se abre al pulsar una fila del listado.", "page": "page-dark" },
+    { "id": "note-extra-screens", "x": 1600, "y": 2020, "w": 900, "text": "Pantallas adicionales del panel (Fase 1): resumen, calendario real, cuotas globales, ajustes e importación de alumnos por foto.", "page": "page-dark" },
+
+    { "id": "note-landing-light", "x": 0, "y": -100, "w": 420, "text": "Misma web, fondo claro — horario real, tarifas y CTA a WhatsApp incluidos.", "page": "page-light" },
+    { "id": "note-login-light", "x": 1600, "y": -1300, "w": 420, "text": "Mismo login, fondo claro.", "page": "page-light" },
+    { "id": "note-panel-light", "x": 1600, "y": -100, "w": 420, "text": "Mismo panel interno, fondo claro. Esquinas curvas aplicadas.", "page": "page-light" },
+    { "id": "note-ficha-light", "x": 1600, "y": 960, "w": 420, "text": "Misma ficha de alumno, fondo claro.", "page": "page-light" },
+    { "id": "note-extra-screens-light", "x": 1600, "y": 2020, "w": 900, "text": "Mismas pantallas adicionales, fondo claro.", "page": "page-light" }
+  ],
+  "launch": { "view": "canvas", "page": "page-dark" }
+}

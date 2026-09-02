@@ -1,0 +1,11 @@
+{
+  "name": "@fighters-gym/landing",
+  "private": true,
+  "version": "0.1.0",
+  "scripts": {
+    "dev": "echo \"landing not scaffolded yet — build order step 9 (Next.js App Router, static export)\" && exit 1",
+    "build": "echo \"landing not scaffolded yet\" && exit 1",
+    "typecheck": "echo \"landing not scaffolded yet\"",
+    "lint": "echo \"landing not scaffolded yet\""
+  }
+}

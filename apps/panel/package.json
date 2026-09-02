@@ -1,0 +1,11 @@
+{
+  "name": "@fighters-gym/panel",
+  "private": true,
+  "version": "0.1.0",
+  "scripts": {
+    "dev": "echo \"panel not scaffolded yet — build order step 6 (Vite + React + vite-plugin-pwa)\" && exit 1",
+    "build": "echo \"panel not scaffolded yet\" && exit 1",
+    "typecheck": "echo \"panel not scaffolded yet\"",
+    "lint": "echo \"panel not scaffolded yet\""
+  }
+}

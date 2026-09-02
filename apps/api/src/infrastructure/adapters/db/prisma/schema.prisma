@@ -1,0 +1,154 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Rol {
+  admin
+  profesor
+}
+
+enum EstadoAlumno {
+  activo
+  dado_de_baja
+}
+
+enum Disciplina {
+  boxeo
+  kickboxing
+  muay_thai
+  mma
+  jiu_jitsu
+  grappling
+  krav_maga
+  defensa_personal
+  boxeo_infantil
+  krav_maga_infantil
+  competicion
+}
+
+enum MetodoPago {
+  bizum
+  transferencia
+  efectivo
+}
+
+enum EstadoAsistencia {
+  asistio
+  justificada
+  sin_avisar
+}
+
+enum DiaSemana {
+  lunes
+  martes
+  miercoles
+  jueves
+  viernes
+}
+
+model Usuario {
+  id           String   @id @default(uuid())
+  nombre       String
+  email        String   @unique
+  passwordHash String   @map("password_hash")
+  rol          Rol
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  cuotasConfirmadas Cuota[] @relation("CuotaConfirmadaPor")
+
+  @@map("usuarios")
+}
+
+model Alumno {
+  id              String       @id @default(uuid())
+  nombre          String
+  apellidos       String
+  telefono        String
+  email           String?
+  dniNie          String       @map("dni_nie")
+  fechaNacimiento DateTime     @map("fecha_nacimiento") @db.Date
+  fechaAlta       DateTime     @map("fecha_alta") @db.Date
+  estado          EstadoAlumno
+  cuotaMensual    Decimal      @map("cuota_mensual") @db.Decimal(10, 2)
+  avatarSeed      String       @map("avatar_seed")
+  createdAt       DateTime     @default(now()) @map("created_at")
+  updatedAt       DateTime     @updatedAt @map("updated_at")
+
+  disciplinas AlumnoDisciplina[]
+  cuotas      Cuota[]
+  asistencias Asistencia[]
+
+  @@map("alumnos")
+}
+
+model AlumnoDisciplina {
+  alumnoId   String     @map("alumno_id")
+  disciplina Disciplina
+
+  alumno Alumno @relation(fields: [alumnoId], references: [id], onDelete: Cascade)
+
+  @@id([alumnoId, disciplina])
+  @@map("alumno_disciplinas")
+}
+
+model Cuota {
+  id            String      @id @default(uuid())
+  alumnoId      String      @map("alumno_id")
+  periodo       DateTime    @db.Date
+  importe       Decimal     @db.Decimal(10, 2)
+  metodo        MetodoPago?
+  fechaPago     DateTime?   @map("fecha_pago")
+  confirmadoPor String?     @map("confirmado_por")
+
+  // Sin columna "estado": es siempre derivado (fechaPago + periodo + margen de 5 días),
+  // ver Cuota.estadoActual() en el dominio — persistirlo aparte solo crearía un dato
+  // duplicado que podría desincronizarse.
+  alumno               Alumno   @relation(fields: [alumnoId], references: [id], onDelete: Cascade)
+  confirmadoPorUsuario Usuario? @relation("CuotaConfirmadaPor", fields: [confirmadoPor], references: [id])
+
+  @@unique([alumnoId, periodo])
+  @@map("cuotas")
+}
+
+model Asistencia {
+  id       String           @id @default(uuid())
+  alumnoId String           @map("alumno_id")
+  fecha    DateTime         @db.Date
+  estado   EstadoAsistencia
+
+  alumno Alumno @relation(fields: [alumnoId], references: [id], onDelete: Cascade)
+
+  @@unique([alumnoId, fecha])
+  @@map("asistencias")
+}
+
+model Clase {
+  id         String     @id @default(uuid())
+  nombre     String
+  disciplina Disciplina
+  diaSemana  DiaSemana  @map("dia_semana")
+  horaInicio String     @map("hora_inicio")
+  horaFin    String     @map("hora_fin")
+  esInfantil Boolean    @map("es_infantil")
+  esSparring Boolean    @map("es_sparring")
+
+  @@map("clases")
+}
+
+/// Tabla de una sola fila (id fijo = 1) — configuración global del gimnasio.
+model ConfiguracionGimnasio {
+  id                           Int     @id @default(1)
+  nombre                       String
+  direccion                    String
+  telefono                     String
+  email                        String
+  escaneoFichasActivo          Boolean @map("escaneo_fichas_activo")
+  notificacionesWhatsappActivo Boolean @map("notificaciones_whatsapp_activo")
+
+  @@map("configuracion_gimnasio")
+}

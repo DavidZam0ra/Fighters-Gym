@@ -1,0 +1,16 @@
+{
+  "name": "fighters-gym",
+  "private": true,
+  "packageManager": "pnpm@9.15.0",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev:api": "pnpm --filter @fighters-gym/api dev",
+    "dev:panel": "pnpm --filter @fighters-gym/panel dev",
+    "dev:landing": "pnpm --filter @fighters-gym/landing dev",
+    "build": "pnpm -r build",
+    "lint": "pnpm -r lint",
+    "typecheck": "pnpm -r typecheck"
+  }
+}
