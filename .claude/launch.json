@@ -1,0 +1,17 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "panel",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["--yes", "pnpm@9.15.0", "--filter", "@fighters-gym/panel", "dev"],
+      "port": 5173
+    },
+    {
+      "name": "api",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["--yes", "pnpm@9.15.0", "dev:api"],
+      "port": 4000
+    }
+  ]
+}

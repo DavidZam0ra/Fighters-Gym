@@ -105,6 +105,33 @@ describe("POST /auth/login", () => {
   });
 });
 
+describe("POST /auth/refresh", () => {
+  it("responde 401, no 500, cuando no hay cookie de sesión", async () => {
+    const { app } = await construirApp();
+
+    // Regresión: el panel llama a /auth/refresh al arrancar, sin cuerpo,
+    // pero con Content-Type: application/json — Fastify trata eso como un
+    // error de parseo (cuerpo vacío) que el errorHandler debe traducir a un
+    // 4xx normal, no a un 500 genérico.
+    const respuesta = await app.inject({
+      method: "POST",
+      url: "/auth/refresh",
+      headers: { "content-type": "application/json" },
+    });
+
+    expect(respuesta.statusCode).not.toBe(500);
+    expect(respuesta.statusCode).toBe(400);
+  });
+
+  it("responde 401 cuando la cookie de refresco no existe", async () => {
+    const { app } = await construirApp();
+
+    const respuesta = await app.inject({ method: "POST", url: "/auth/refresh" });
+
+    expect(respuesta.statusCode).toBe(401);
+  });
+});
+
 describe("Rutas de alumnos", () => {
   it("GET /alumnos exige autenticación", async () => {
     const { app } = await construirApp();
