@@ -1,0 +1,19 @@
+# Render blueprint. Por ahora solo el API — los Static Sites de panel/landing
+# se añaden aquí en los pasos 6 y 9 del plan, cuando esas apps existan de verdad.
+services:
+  - type: web
+    name: fighters-gym-api
+    runtime: node
+    plan: starter
+    healthCheckPath: /health
+    buildCommand: pnpm install --frozen-lockfile && pnpm --filter @fighters-gym/api prisma:generate && pnpm --filter @fighters-gym/api build
+    startCommand: pnpm --filter @fighters-gym/api start
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: JWT_ACCESS_SECRET
+        sync: false
+      - key: JWT_REFRESH_SECRET
+        sync: false
+      - key: CORS_ORIGIN
+        sync: false
