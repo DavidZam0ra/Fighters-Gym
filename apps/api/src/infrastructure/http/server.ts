@@ -7,7 +7,7 @@ import { registrarManejadorErrores } from "./errorHandler.js";
 import { registrarRutasAuth } from "./routes/auth.routes.js";
 import { registrarRutasAlumnos } from "./routes/alumno.routes.js";
 
-const PUERTO = Number(process.env["PORT"] ?? 3000);
+const PUERTO = Number(process.env["PORT"] ?? 4000);
 
 async function main(): Promise<void> {
   const jwtAccessSecret = process.env["JWT_ACCESS_SECRET"];
