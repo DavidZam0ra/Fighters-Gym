@@ -2,6 +2,79 @@
 // Never put domain entities/value objects here — those live in
 // apps/api/src/domain and stay private to the API.
 //
-// Populated feature-by-feature as each API route/panel screen is built
-// (see the build order in the scaffold plan). Left empty at scaffold time.
-export {};
+// Populado feature a feature a medida que se construye cada ruta/pantalla
+// (ver el build order del plan). Primeras DTOs: auth + alumnos (Paso 5).
+
+export type Disciplina =
+  | "boxeo"
+  | "kickboxing"
+  | "muay_thai"
+  | "mma"
+  | "jiu_jitsu"
+  | "grappling"
+  | "krav_maga"
+  | "defensa_personal"
+  | "boxeo_infantil"
+  | "krav_maga_infantil"
+  | "competicion";
+
+export type EstadoAlumno = "activo" | "dado_de_baja";
+export type EstadoCuota = "pagado" | "pendiente" | "atrasado";
+export type MetodoPago = "bizum" | "transferencia" | "efectivo";
+export type EstadoAsistencia = "asistio" | "justificada" | "sin_avisar";
+
+export interface AlumnoDTO {
+  id: string;
+  nombre: string;
+  apellidos: string;
+  telefono: string;
+  email: string | null;
+  dniNie: string;
+  fechaNacimiento: string;
+  fechaAlta: string;
+  estado: EstadoAlumno;
+  cuotaMensual: number;
+  disciplinas: Disciplina[];
+  avatarSeed: string;
+}
+
+export interface CrearAlumnoRequestDTO {
+  nombre: string;
+  apellidos: string;
+  telefono: string;
+  email: string | null;
+  dniNie: string;
+  fechaNacimiento: string;
+  cuotaMensual: number;
+  disciplinas: Disciplina[];
+}
+
+export interface CuotaDTO {
+  id: string;
+  periodo: string;
+  importe: number;
+  metodo: MetodoPago | null;
+  fechaPago: string | null;
+  estado: EstadoCuota;
+}
+
+export interface AsistenciaDTO {
+  id: string;
+  fecha: string;
+  estado: EstadoAsistencia;
+}
+
+export interface FichaAlumnoDTO {
+  alumno: AlumnoDTO;
+  cuotasRecientes: CuotaDTO[];
+  asistenciaDelMes: AsistenciaDTO[];
+}
+
+export interface LoginRequestDTO {
+  email: string;
+  password: string;
+}
+
+export interface LoginResponseDTO {
+  accessToken: string;
+}
