@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import type { AlumnoDTO } from "@fighters-gym/shared-types";
 import { useAuth } from "../lib/AuthContext.js";
 import { peticionApi } from "../lib/apiClient.js";
@@ -50,7 +51,7 @@ export function AlumnosPage() {
             <p className="lista-vacia">No hay alumnos que coincidan con la búsqueda.</p>
           ) : (
             alumnosFiltrados.map((alumno) => (
-              <div className="fila-alumno" key={alumno.id}>
+              <Link className="fila-alumno" to={`/alumnos/${alumno.id}`} key={alumno.id}>
                 <div className="fila-alumno-avatar">
                   {alumno.nombre.charAt(0).toUpperCase()}
                   {alumno.apellidos.charAt(0).toUpperCase()}
@@ -61,7 +62,7 @@ export function AlumnosPage() {
                   </span>
                   <span className="texto-muted">{alumno.disciplinas.join(", ")}</span>
                 </div>
-              </div>
+              </Link>
             ))
           )}
         </div>

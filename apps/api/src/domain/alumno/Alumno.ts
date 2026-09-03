@@ -15,6 +15,7 @@ export interface AlumnoProps {
   estado: EstadoAlumno;
   cuotaMensual: number;
   disciplinas: Disciplina[];
+  notas?: string | null;
   /** Solo al reconstruir desde persistencia — si se omite, se calcula de nombre+apellidos. */
   avatarSeed?: AvatarSeed;
 }
@@ -31,6 +32,7 @@ export class Alumno {
   private _estado: EstadoAlumno;
   cuotaMensual: number;
   private _disciplinas: Disciplina[];
+  private _notas: string | null;
   readonly avatarSeed: AvatarSeed;
 
   constructor(props: AlumnoProps) {
@@ -47,6 +49,7 @@ export class Alumno {
     this._estado = props.estado;
     this.cuotaMensual = props.cuotaMensual;
     this._disciplinas = props.disciplinas;
+    this._notas = props.notas ?? null;
     this.avatarSeed = props.avatarSeed ?? AvatarSeed.desde(props.nombre, props.apellidos);
   }
 
@@ -56,6 +59,14 @@ export class Alumno {
 
   get disciplinas(): readonly Disciplina[] {
     return this._disciplinas;
+  }
+
+  get notas(): string | null {
+    return this._notas;
+  }
+
+  actualizarNotas(notas: string | null): void {
+    this._notas = notas !== null && notas.trim().length === 0 ? null : notas;
   }
 
   get nombreCompleto(): string {

@@ -17,6 +17,7 @@ export function aAlumnoDTO(alumno: Alumno): AlumnoDTO {
     estado: alumno.estado,
     cuotaMensual: alumno.cuotaMensual,
     disciplinas: [...alumno.disciplinas],
+    notas: alumno.notas,
     avatarSeed: alumno.avatarSeed.toString(),
   };
 }

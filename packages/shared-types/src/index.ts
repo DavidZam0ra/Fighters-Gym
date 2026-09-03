@@ -35,7 +35,12 @@ export interface AlumnoDTO {
   estado: EstadoAlumno;
   cuotaMensual: number;
   disciplinas: Disciplina[];
+  notas: string | null;
   avatarSeed: string;
+}
+
+export interface ActualizarNotasRequestDTO {
+  notas: string | null;
 }
 
 export interface CrearAlumnoRequestDTO {

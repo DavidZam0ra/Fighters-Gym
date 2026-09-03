@@ -22,6 +22,7 @@ export class PrismaAlumnoRepository implements AlumnoRepository {
       estado: alumno.estado,
       cuotaMensual: alumno.cuotaMensual,
       avatarSeed: alumno.avatarSeed.toString(),
+      notas: alumno.notas,
     };
 
     await this.prisma.$transaction([
@@ -66,6 +67,7 @@ export class PrismaAlumnoRepository implements AlumnoRepository {
       estado: fila.estado as EstadoAlumno,
       cuotaMensual: Number(fila.cuotaMensual),
       disciplinas: fila.disciplinas.map((d) => d.disciplina as Disciplina),
+      notas: fila.notas,
       avatarSeed: AvatarSeed.desdeValorAlmacenado(fila.avatarSeed),
     });
   }

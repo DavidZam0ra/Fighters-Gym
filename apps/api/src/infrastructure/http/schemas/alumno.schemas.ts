@@ -11,3 +11,7 @@ export const crearAlumnoSchema = z.object({
   cuotaMensual: z.number().positive(),
   disciplinas: z.array(z.enum(DISCIPLINAS)).min(1),
 });
+
+export const actualizarNotasSchema = z.object({
+  notas: z.string().nullable(),
+});

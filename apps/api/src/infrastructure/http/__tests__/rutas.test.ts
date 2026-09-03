@@ -15,6 +15,7 @@ import { CrearAlumnoUseCase } from "../../../application/use-cases/alumno/CrearA
 import { ListarAlumnosUseCase } from "../../../application/use-cases/alumno/ListarAlumnosUseCase.js";
 import { ObtenerFichaAlumnoUseCase } from "../../../application/use-cases/alumno/ObtenerFichaAlumnoUseCase.js";
 import { DarDeBajaAlumnoUseCase } from "../../../application/use-cases/alumno/DarDeBajaAlumnoUseCase.js";
+import { ActualizarNotasAlumnoUseCase } from "../../../application/use-cases/alumno/ActualizarNotasAlumnoUseCase.js";
 import { ObtenerResumenDashboardUseCase } from "../../../application/use-cases/dashboard/ObtenerResumenDashboardUseCase.js";
 import {
   AlumnoRepositoryFake,
@@ -59,6 +60,7 @@ async function construirApp(): Promise<{ app: FastifyInstance; tokens: TokenServ
     listarAlumnosUseCase: new ListarAlumnosUseCase(alumnos),
     obtenerFichaAlumnoUseCase: new ObtenerFichaAlumnoUseCase(alumnos, cuotas, asistencias),
     darDeBajaAlumnoUseCase: new DarDeBajaAlumnoUseCase(alumnos),
+    actualizarNotasAlumnoUseCase: new ActualizarNotasAlumnoUseCase(alumnos),
     obtenerUsuarioActualUseCase: new ObtenerUsuarioActualUseCase(usuarios),
     obtenerResumenDashboardUseCase: new ObtenerResumenDashboardUseCase(alumnos, cuotas, clases, clock),
   };
@@ -184,6 +186,22 @@ describe("Rutas de alumnos", () => {
     });
     expect(ficha.statusCode).toBe(200);
     expect(ficha.json().alumno.id).toBe(alumnoCreado.id);
+    expect(ficha.json().alumno.notas).toBeNull();
+
+    const notas = await app.inject({
+      method: "PATCH",
+      url: `/alumnos/${alumnoCreado.id}/notas`,
+      headers: cabeceras,
+      payload: { notas: "Preparando su primer combate amateur." },
+    });
+    expect(notas.statusCode).toBe(204);
+
+    const fichaConNotas = await app.inject({
+      method: "GET",
+      url: `/alumnos/${alumnoCreado.id}`,
+      headers: cabeceras,
+    });
+    expect(fichaConNotas.json().alumno.notas).toBe("Preparando su primer combate amateur.");
 
     const baja = await app.inject({
       method: "POST",

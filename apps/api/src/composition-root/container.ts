@@ -16,6 +16,7 @@ import { CrearAlumnoUseCase } from "../application/use-cases/alumno/CrearAlumnoU
 import { ListarAlumnosUseCase } from "../application/use-cases/alumno/ListarAlumnosUseCase.js";
 import { ObtenerFichaAlumnoUseCase } from "../application/use-cases/alumno/ObtenerFichaAlumnoUseCase.js";
 import { DarDeBajaAlumnoUseCase } from "../application/use-cases/alumno/DarDeBajaAlumnoUseCase.js";
+import { ActualizarNotasAlumnoUseCase } from "../application/use-cases/alumno/ActualizarNotasAlumnoUseCase.js";
 import { ObtenerUsuarioActualUseCase } from "../application/use-cases/auth/ObtenerUsuarioActualUseCase.js";
 import { ObtenerResumenDashboardUseCase } from "../application/use-cases/dashboard/ObtenerResumenDashboardUseCase.js";
 
@@ -39,6 +40,7 @@ export interface Container {
   listarAlumnosUseCase: ListarAlumnosUseCase;
   obtenerFichaAlumnoUseCase: ObtenerFichaAlumnoUseCase;
   darDeBajaAlumnoUseCase: DarDeBajaAlumnoUseCase;
+  actualizarNotasAlumnoUseCase: ActualizarNotasAlumnoUseCase;
   obtenerUsuarioActualUseCase: ObtenerUsuarioActualUseCase;
   obtenerResumenDashboardUseCase: ObtenerResumenDashboardUseCase;
 }
@@ -70,6 +72,7 @@ export function crearContainer(env: EnvConfig): Container {
       asistenciaRepository
     ),
     darDeBajaAlumnoUseCase: new DarDeBajaAlumnoUseCase(alumnoRepository),
+    actualizarNotasAlumnoUseCase: new ActualizarNotasAlumnoUseCase(alumnoRepository),
     obtenerUsuarioActualUseCase: new ObtenerUsuarioActualUseCase(usuarioRepository),
     obtenerResumenDashboardUseCase: new ObtenerResumenDashboardUseCase(
       alumnoRepository,

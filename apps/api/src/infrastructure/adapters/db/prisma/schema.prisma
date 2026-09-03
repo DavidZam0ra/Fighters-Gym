@@ -76,6 +76,7 @@ model Alumno {
   estado          EstadoAlumno
   cuotaMensual    Decimal      @map("cuota_mensual") @db.Decimal(10, 2)
   avatarSeed      String       @map("avatar_seed")
+  notas           String?
   createdAt       DateTime     @default(now()) @map("created_at")
   updatedAt       DateTime     @updatedAt @map("updated_at")
 
