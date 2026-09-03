@@ -139,3 +139,19 @@ export interface ResumenDashboardDTO {
   cuotasAtrasadas: CuotaPendienteResumenDTO[];
   horarioHoy: ClaseDeHoyDTO[];
 }
+
+export interface ConfiguracionGimnasioDTO {
+  nombre: string;
+  direccion: string;
+  telefono: string;
+  email: string;
+  escaneoFichasActivo: boolean;
+  notificacionesWhatsappActivo: boolean;
+}
+
+export type ActualizarConfiguracionGimnasioRequestDTO = ConfiguracionGimnasioDTO;
+
+export interface CambiarPasswordRequestDTO {
+  passwordActual: string;
+  passwordNueva: string;
+}

@@ -39,4 +39,12 @@ export class ConfiguracionGimnasio {
   get notificacionesWhatsappActivo(): boolean {
     return this._notificacionesWhatsappActivo;
   }
+
+  activarNotificacionesWhatsapp(): void {
+    this._notificacionesWhatsappActivo = true;
+  }
+
+  desactivarNotificacionesWhatsapp(): void {
+    this._notificacionesWhatsappActivo = false;
+  }
 }

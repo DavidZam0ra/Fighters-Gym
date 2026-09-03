@@ -1107,6 +1107,131 @@ button:disabled {
   align-self: stretch;
 }
 
+/* ---------- Ajustes ---------- */
+
+.ajustes-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  max-width: 640px;
+}
+
+.tarjeta-panel-cabecera {
+  font-size: 16px;
+  margin: 0;
+}
+
+.ajustes-guardar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 4px;
+}
+
+.texto-exito {
+  font-size: 13px;
+  color: var(--color-exito);
+}
+
+.ajustes-usuario-fila {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 0 14px;
+}
+
+.ajustes-usuario-nombre {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.etiqueta-pill {
+  font-size: 11px;
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+  padding: 4px 10px;
+  border-radius: 999px;
+  flex-shrink: 0;
+}
+
+.etiqueta-pill--proximamente {
+  font-size: 10px;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+
+.ajustes-cambiar-password-boton {
+  align-self: flex-start;
+}
+
+.ajustes-password-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.ajustes-funcionalidad-fila {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.ajustes-funcionalidad-fila--ultima {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.ajustes-funcionalidad-titulo {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.ajustes-funcionalidad-descripcion {
+  font-size: 11px;
+  margin-top: 2px;
+}
+
+.interruptor {
+  width: 38px;
+  height: 22px;
+  flex-shrink: 0;
+  background: #3a383c;
+  border: none;
+  border-radius: 999px;
+  position: relative;
+  padding: 0;
+}
+
+.interruptor--activo {
+  background: var(--accent);
+}
+
+.interruptor-bola {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--text);
+  transition: transform 0.15s;
+}
+
+.interruptor--activo .interruptor-bola {
+  transform: translateX(16px);
+}
+
+.interruptor:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 @media (min-width: 768px) {
   .alumnos-cabecera-acciones {
     flex-direction: row;

@@ -17,6 +17,8 @@ import type { Asistencia } from "../../domain/asistencia/Asistencia.js";
 import type { Clase } from "../../domain/clase/Clase.js";
 import type { Usuario } from "../../domain/usuario/Usuario.js";
 import { PasswordHash } from "../../domain/usuario/PasswordHash.js";
+import type { ConfiguracionGimnasioRepository } from "../ports/out/ConfiguracionGimnasioRepository.js";
+import { ConfiguracionGimnasio } from "../../domain/gimnasio/ConfiguracionGimnasio.js";
 
 export class AlumnoRepositoryFake implements AlumnoRepository {
   private readonly porId = new Map<string, Alumno>();
@@ -93,7 +95,11 @@ export class AsistenciaRepositoryFake implements AsistenciaRepository {
 }
 
 export class UsuarioRepositoryFake implements UsuarioRepository {
-  constructor(private readonly usuarios: Usuario[] = []) {}
+  private readonly usuarios: Usuario[];
+
+  constructor(usuarios: Usuario[] = []) {
+    this.usuarios = usuarios;
+  }
 
   async buscarPorEmail(email: string): Promise<Usuario | null> {
     return this.usuarios.find((u) => u.email === email.toLowerCase()) ?? null;
@@ -101,6 +107,15 @@ export class UsuarioRepositoryFake implements UsuarioRepository {
 
   async buscarPorId(id: string): Promise<Usuario | null> {
     return this.usuarios.find((u) => u.id === id) ?? null;
+  }
+
+  async guardar(usuario: Usuario): Promise<void> {
+    const indice = this.usuarios.findIndex((u) => u.id === usuario.id);
+    if (indice === -1) {
+      this.usuarios.push(usuario);
+    } else {
+      this.usuarios[indice] = usuario;
+    }
   }
 }
 
@@ -138,6 +153,31 @@ export class ClockFake implements Clock {
 
   avanzarA(fecha: Date): void {
     this.fecha = fecha;
+  }
+}
+
+export class ConfiguracionGimnasioRepositoryFake implements ConfiguracionGimnasioRepository {
+  private configuracion: ConfiguracionGimnasio;
+
+  constructor(
+    configuracion: ConfiguracionGimnasio = new ConfiguracionGimnasio({
+      nombre: "Fighters Gym",
+      direccion: "Carrer Comtes de Parcent 19, Almàssera",
+      telefono: "667 09 55 99",
+      email: "fightersgym.vlc@gmail.com",
+      escaneoFichasActivo: false,
+      notificacionesWhatsappActivo: false,
+    })
+  ) {
+    this.configuracion = configuracion;
+  }
+
+  async obtener(): Promise<ConfiguracionGimnasio> {
+    return this.configuracion;
+  }
+
+  async guardar(configuracion: ConfiguracionGimnasio): Promise<void> {
+    this.configuracion = configuracion;
   }
 }
 

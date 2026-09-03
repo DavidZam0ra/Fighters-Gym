@@ -19,6 +19,13 @@ export class PrismaUsuarioRepository implements UsuarioRepository {
     return fila === null ? null : this.aDominio(fila);
   }
 
+  async guardar(usuario: Usuario): Promise<void> {
+    await this.prisma.usuario.update({
+      where: { id: usuario.id },
+      data: { passwordHash: usuario.passwordHash.toString() },
+    });
+  }
+
   private aDominio(fila: UsuarioRow): Usuario {
     return new Usuario({
       id: fila.id,

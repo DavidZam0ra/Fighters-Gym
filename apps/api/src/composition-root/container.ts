@@ -5,6 +5,7 @@ import { PrismaCuotaRepository } from "../infrastructure/adapters/db/PrismaCuota
 import { PrismaAsistenciaRepository } from "../infrastructure/adapters/db/PrismaAsistenciaRepository.js";
 import { PrismaUsuarioRepository } from "../infrastructure/adapters/db/PrismaUsuarioRepository.js";
 import { PrismaClaseRepository } from "../infrastructure/adapters/db/PrismaClaseRepository.js";
+import { PrismaConfiguracionGimnasioRepository } from "../infrastructure/adapters/db/PrismaConfiguracionGimnasioRepository.js";
 import { BcryptPasswordHasher } from "../infrastructure/adapters/auth/BcryptPasswordHasher.js";
 import { JwtTokenService } from "../infrastructure/adapters/auth/JwtTokenService.js";
 import { SystemClock } from "../infrastructure/adapters/clock/SystemClock.js";
@@ -23,6 +24,9 @@ import { RegistrarCuotasDelMesUseCase } from "../application/use-cases/cuota/Reg
 import { ListarCuotasDelMesUseCase } from "../application/use-cases/cuota/ListarCuotasDelMesUseCase.js";
 import { ConfirmarPagoUseCase } from "../application/use-cases/cuota/ConfirmarPagoUseCase.js";
 import { ListarClasesUseCase } from "../application/use-cases/clase/ListarClasesUseCase.js";
+import { ObtenerConfiguracionGimnasioUseCase } from "../application/use-cases/ajustes/ObtenerConfiguracionGimnasioUseCase.js";
+import { ActualizarConfiguracionGimnasioUseCase } from "../application/use-cases/ajustes/ActualizarConfiguracionGimnasioUseCase.js";
+import { CambiarPasswordUseCase } from "../application/use-cases/auth/CambiarPasswordUseCase.js";
 
 export interface EnvConfig {
   jwtAccessSecret: string;
@@ -50,6 +54,9 @@ export interface Container {
   listarCuotasDelMesUseCase: ListarCuotasDelMesUseCase;
   confirmarPagoUseCase: ConfirmarPagoUseCase;
   listarClasesUseCase: ListarClasesUseCase;
+  obtenerConfiguracionGimnasioUseCase: ObtenerConfiguracionGimnasioUseCase;
+  actualizarConfiguracionGimnasioUseCase: ActualizarConfiguracionGimnasioUseCase;
+  cambiarPasswordUseCase: CambiarPasswordUseCase;
 }
 
 export function crearContainer(env: EnvConfig): Container {
@@ -58,6 +65,7 @@ export function crearContainer(env: EnvConfig): Container {
   const asistenciaRepository = new PrismaAsistenciaRepository(prisma);
   const usuarioRepository = new PrismaUsuarioRepository(prisma);
   const claseRepository = new PrismaClaseRepository(prisma);
+  const configuracionGimnasioRepository = new PrismaConfiguracionGimnasioRepository(prisma);
 
   const passwordHasher = new BcryptPasswordHasher();
   const tokenService = new JwtTokenService({
@@ -97,5 +105,10 @@ export function crearContainer(env: EnvConfig): Container {
     ),
     confirmarPagoUseCase: new ConfirmarPagoUseCase(cuotaRepository, clock),
     listarClasesUseCase: new ListarClasesUseCase(claseRepository),
+    obtenerConfiguracionGimnasioUseCase: new ObtenerConfiguracionGimnasioUseCase(configuracionGimnasioRepository),
+    actualizarConfiguracionGimnasioUseCase: new ActualizarConfiguracionGimnasioUseCase(
+      configuracionGimnasioRepository
+    ),
+    cambiarPasswordUseCase: new CambiarPasswordUseCase(usuarioRepository, passwordHasher),
   };
 }

@@ -17,6 +17,11 @@ const ENLACES_NAV: EnlaceNav[] = [
   { to: "/cuotas", etiqueta: "Cuotas", icono: "cuotas" },
 ];
 
+const ENLACES_CUENTA: EnlaceNav[] = [{ to: "/ajustes", etiqueta: "Ajustes", icono: "ajustes" }];
+
+// La tabbar móvil no tiene secciones — junta Gestión + Cuenta en una sola fila.
+const ENLACES_TABBAR: EnlaceNav[] = [...ENLACES_NAV, ...ENLACES_CUENTA];
+
 export function PanelLayout({ children, titulo }: { children: ReactNode; titulo: string }) {
   const { usuario, logout } = useAuth();
   const location = useLocation();
@@ -43,10 +48,9 @@ export function PanelLayout({ children, titulo }: { children: ReactNode; titulo:
 
         <div className="panel-nav-titulo">Cuenta</div>
         <nav className="panel-nav">
-          <span className="panel-nav-link panel-nav-link--proximamente" title="Próximamente">
-            <NavIcon nombre="ajustes" />
-            Ajustes
-          </span>
+          {ENLACES_CUENTA.map((enlace) => (
+            <EnlaceSidebar key={enlace.to} enlace={enlace} activo={location.pathname === enlace.to} />
+          ))}
         </nav>
 
         <div className="panel-usuario">
@@ -74,7 +78,7 @@ export function PanelLayout({ children, titulo }: { children: ReactNode; titulo:
       </div>
 
       <nav className="panel-tabbar">
-        {ENLACES_NAV.map((enlace) => (
+        {ENLACES_TABBAR.map((enlace) => (
           <EnlaceTabBar key={enlace.to} enlace={enlace} activo={location.pathname === enlace.to} />
         ))}
       </nav>

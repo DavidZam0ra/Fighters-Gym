@@ -13,15 +13,23 @@ export class Usuario {
   readonly id: string;
   readonly nombre: string;
   readonly email: string;
-  readonly passwordHash: PasswordHash;
+  private _passwordHash: PasswordHash;
   readonly rol: Rol;
 
   constructor(props: UsuarioProps) {
     this.id = props.id;
     this.nombre = props.nombre;
     this.email = props.email.toLowerCase();
-    this.passwordHash = props.passwordHash;
+    this._passwordHash = props.passwordHash;
     this.rol = props.rol;
+  }
+
+  get passwordHash(): PasswordHash {
+    return this._passwordHash;
+  }
+
+  cambiarPassword(nuevoHash: PasswordHash): void {
+    this._passwordHash = nuevoHash;
   }
 
   esAdmin(): boolean {

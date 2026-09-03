@@ -8,6 +8,7 @@ import { registrarRutasUsuario } from "../routes/usuario.routes.js";
 import { registrarRutasDashboard } from "../routes/dashboard.routes.js";
 import { registrarRutasCuotas } from "../routes/cuota.routes.js";
 import { registrarRutasClases } from "../routes/clase.routes.js";
+import { registrarRutasAjustes } from "../routes/ajustes.routes.js";
 import { crearAuthenticate } from "../middleware/authenticate.js";
 import type { Container } from "../../../composition-root/container.js";
 import { LoginUseCase } from "../../../application/use-cases/auth/LoginUseCase.js";
@@ -23,12 +24,16 @@ import { RegistrarCuotasDelMesUseCase } from "../../../application/use-cases/cuo
 import { ListarCuotasDelMesUseCase } from "../../../application/use-cases/cuota/ListarCuotasDelMesUseCase.js";
 import { ConfirmarPagoUseCase } from "../../../application/use-cases/cuota/ConfirmarPagoUseCase.js";
 import { ListarClasesUseCase } from "../../../application/use-cases/clase/ListarClasesUseCase.js";
+import { ObtenerConfiguracionGimnasioUseCase } from "../../../application/use-cases/ajustes/ObtenerConfiguracionGimnasioUseCase.js";
+import { ActualizarConfiguracionGimnasioUseCase } from "../../../application/use-cases/ajustes/ActualizarConfiguracionGimnasioUseCase.js";
+import { CambiarPasswordUseCase } from "../../../application/use-cases/auth/CambiarPasswordUseCase.js";
 import {
   AlumnoRepositoryFake,
   CuotaRepositoryFake,
   AsistenciaRepositoryFake,
   ClaseRepositoryFake,
   UsuarioRepositoryFake,
+  ConfiguracionGimnasioRepositoryFake,
   PasswordHasherFake,
   TokenServiceFake,
   ClockFake,
@@ -61,6 +66,7 @@ async function construirApp(): Promise<{
     rol: "admin",
   });
   const usuarios = new UsuarioRepositoryFake([usuario]);
+  const configuracionGimnasio = new ConfiguracionGimnasioRepositoryFake();
   const registrarCuotasDelMes = new RegistrarCuotasDelMesUseCase(alumnos, cuotas, clock);
 
   const container: Container = {
@@ -84,6 +90,9 @@ async function construirApp(): Promise<{
     listarCuotasDelMesUseCase: new ListarCuotasDelMesUseCase(cuotas, alumnos, registrarCuotasDelMes, clock),
     confirmarPagoUseCase: new ConfirmarPagoUseCase(cuotas, clock),
     listarClasesUseCase: new ListarClasesUseCase(clases),
+    obtenerConfiguracionGimnasioUseCase: new ObtenerConfiguracionGimnasioUseCase(configuracionGimnasio),
+    actualizarConfiguracionGimnasioUseCase: new ActualizarConfiguracionGimnasioUseCase(configuracionGimnasio),
+    cambiarPasswordUseCase: new CambiarPasswordUseCase(usuarios, hasher),
   };
 
   const app = Fastify();
@@ -95,6 +104,7 @@ async function construirApp(): Promise<{
   registrarRutasDashboard(app, container);
   registrarRutasClases(app, container);
   registrarRutasCuotas(app, container);
+  registrarRutasAjustes(app, container);
   await app.ready();
 
   return { app, tokens, clases };
@@ -434,5 +444,95 @@ describe("GET /clases", () => {
         esSparring: false,
       },
     ]);
+  });
+});
+
+describe("Rutas de ajustes", () => {
+  it("GET /ajustes exige autenticación", async () => {
+    const { app } = await construirApp();
+    const respuesta = await app.inject({ method: "GET", url: "/ajustes" });
+    expect(respuesta.statusCode).toBe(401);
+  });
+
+  it("lee y actualiza la configuración del gimnasio", async () => {
+    const { app, tokens } = await construirApp();
+    const { accessToken } = await tokens.emitir("usuario-1");
+    const cabeceras = { authorization: `Bearer ${accessToken}` };
+
+    const lectura = await app.inject({ method: "GET", url: "/ajustes", headers: cabeceras });
+    expect(lectura.statusCode).toBe(200);
+    expect(lectura.json().nombre).toBe("Fighters Gym");
+    expect(lectura.json().escaneoFichasActivo).toBe(false);
+
+    const actualizacion = await app.inject({
+      method: "PUT",
+      url: "/ajustes",
+      headers: cabeceras,
+      payload: {
+        nombre: "Fighters Gym",
+        direccion: "Carrer Comtes de Parcent 19, Almàssera",
+        telefono: "667 09 55 99",
+        email: "fightersgym.vlc@gmail.com",
+        escaneoFichasActivo: true,
+        notificacionesWhatsappActivo: true,
+      },
+    });
+    expect(actualizacion.statusCode).toBe(204);
+
+    const lecturaTrasActualizar = await app.inject({ method: "GET", url: "/ajustes", headers: cabeceras });
+    expect(lecturaTrasActualizar.json().escaneoFichasActivo).toBe(true);
+    expect(lecturaTrasActualizar.json().notificacionesWhatsappActivo).toBe(true);
+  });
+});
+
+describe("POST /auth/cambiar-password", () => {
+  it("exige autenticación", async () => {
+    const { app } = await construirApp();
+    const respuesta = await app.inject({
+      method: "POST",
+      url: "/auth/cambiar-password",
+      payload: { passwordActual: "x", passwordNueva: "clave-nueva-larga" },
+    });
+    expect(respuesta.statusCode).toBe(401);
+  });
+
+  it("rechaza la contraseña actual incorrecta", async () => {
+    const { app, tokens } = await construirApp();
+    const { accessToken } = await tokens.emitir("usuario-1");
+
+    const respuesta = await app.inject({
+      method: "POST",
+      url: "/auth/cambiar-password",
+      headers: { authorization: `Bearer ${accessToken}` },
+      payload: { passwordActual: "incorrecta", passwordNueva: "clave-nueva-larga" },
+    });
+    expect(respuesta.statusCode).toBe(401);
+  });
+
+  it("cambia la contraseña y permite volver a loguearse con la nueva", async () => {
+    const { app, tokens } = await construirApp();
+    const { accessToken } = await tokens.emitir("usuario-1");
+
+    const cambio = await app.inject({
+      method: "POST",
+      url: "/auth/cambiar-password",
+      headers: { authorization: `Bearer ${accessToken}` },
+      payload: { passwordActual: PASSWORD_ADMIN, passwordNueva: "clave-nueva-larga" },
+    });
+    expect(cambio.statusCode).toBe(204);
+
+    const loginConNueva = await app.inject({
+      method: "POST",
+      url: "/auth/login",
+      payload: { email: EMAIL_ADMIN, password: "clave-nueva-larga" },
+    });
+    expect(loginConNueva.statusCode).toBe(200);
+
+    const loginConAntigua = await app.inject({
+      method: "POST",
+      url: "/auth/login",
+      payload: { email: EMAIL_ADMIN, password: PASSWORD_ADMIN },
+    });
+    expect(loginConAntigua.statusCode).toBe(401);
   });
 });
