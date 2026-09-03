@@ -5,6 +5,7 @@ import { useAuth } from "../lib/AuthContext.js";
 import { peticionApi } from "../lib/apiClient.js";
 import { PanelLayout } from "../components/PanelLayout.js";
 import { AlumnoAvatar } from "../components/AlumnoAvatar.js";
+import { FichaAlumnoSkeleton } from "../components/PageSkeletons.js";
 import { etiquetaDisciplina } from "../lib/disciplinas.js";
 
 const NOMBRES_MES = [
@@ -117,7 +118,11 @@ export function FichaAlumnoPage() {
   }
 
   if (ficha === null) {
-    return <PanelLayout titulo="Alumno">{null}</PanelLayout>;
+    return (
+      <PanelLayout titulo="Alumno">
+        <FichaAlumnoSkeleton />
+      </PanelLayout>
+    );
   }
 
   const { alumno, cuotasRecientes, asistenciaDelMes } = ficha;

@@ -3,6 +3,7 @@ import type { ClaseDTO, DiaSemana } from "@fighters-gym/shared-types";
 import { useAuth } from "../lib/AuthContext.js";
 import { peticionApi } from "../lib/apiClient.js";
 import { PanelLayout } from "../components/PanelLayout.js";
+import { CalendarioSkeleton } from "../components/PageSkeletons.js";
 
 const DIAS: Array<{ valor: DiaSemana; etiqueta: string; etiquetaCorta: string }> = [
   { valor: "lunes", etiqueta: "Lunes", etiquetaCorta: "Lun" },
@@ -60,7 +61,9 @@ export function CalendarioPage() {
     <PanelLayout titulo="Calendario">
       {error !== null && <p className="mensaje-error">{error}</p>}
 
-      {clases !== null && (
+      {clases === null ? (
+        <CalendarioSkeleton />
+      ) : (
         <>
           {/* Móvil: selector de día + lista vertical (una rejilla de 5 columnas no
               es legible en un teléfono). Escritorio: rejilla semanal completa. */}

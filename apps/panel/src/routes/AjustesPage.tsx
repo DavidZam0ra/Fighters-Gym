@@ -3,6 +3,7 @@ import type { ConfiguracionGimnasioDTO } from "@fighters-gym/shared-types";
 import { useAuth } from "../lib/AuthContext.js";
 import { ApiError, peticionApi } from "../lib/apiClient.js";
 import { PanelLayout } from "../components/PanelLayout.js";
+import { AjustesSkeleton } from "../components/PageSkeletons.js";
 
 export function AjustesPage() {
   const { accessToken } = useAuth();
@@ -42,7 +43,9 @@ export function AjustesPage() {
     <PanelLayout titulo="Ajustes">
       {error !== null && <p className="mensaje-error">{error}</p>}
 
-      {configuracion !== null && (
+      {configuracion === null ? (
+        <AjustesSkeleton />
+      ) : (
         <div className="ajustes-layout">
           <DatosGimnasioTarjeta
             configuracion={configuracion}

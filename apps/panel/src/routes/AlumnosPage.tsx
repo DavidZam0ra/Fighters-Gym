@@ -5,6 +5,7 @@ import { useAuth } from "../lib/AuthContext.js";
 import { peticionApi } from "../lib/apiClient.js";
 import { PanelLayout } from "../components/PanelLayout.js";
 import { AlumnoAvatar } from "../components/AlumnoAvatar.js";
+import { AlumnosSkeleton } from "../components/PageSkeletons.js";
 import { etiquetaDisciplina } from "../lib/disciplinas.js";
 
 export function AlumnosPage() {
@@ -52,7 +53,9 @@ export function AlumnosPage() {
         </Link>
       </div>
 
-      {alumnos !== null && (
+      {alumnos === null ? (
+        <AlumnosSkeleton />
+      ) : (
         <div className="lista-tarjeta lista-tarjeta--alumnos">
           {alumnosFiltrados.length === 0 ? (
             <p className="lista-vacia">No hay alumnos que coincidan con la búsqueda.</p>

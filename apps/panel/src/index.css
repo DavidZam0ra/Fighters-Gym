@@ -1259,3 +1259,76 @@ button:disabled {
     padding-right: 32px;
   }
 }
+
+/* ---------- Skeletons de carga ---------- */
+
+.skeleton {
+  background: linear-gradient(90deg, var(--bg-elevated) 25%, var(--bg-input) 37%, var(--bg-elevated) 63%);
+  background-size: 400% 100%;
+  animation: skeleton-brillo 1.4s ease infinite;
+  border-radius: 6px;
+}
+
+@keyframes skeleton-brillo {
+  0% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0 50%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton {
+    animation: none;
+    background: var(--bg-elevated);
+  }
+}
+
+.skeleton-circulo {
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.skeleton-tarjeta-kpi-valor {
+  margin-top: 8px;
+}
+
+.skeleton-fila-lista {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.skeleton-fila-lista:last-child {
+  border-bottom: none;
+}
+
+.skeleton-fila-alumno {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.skeleton-fila-alumno:last-child {
+  border-bottom: none;
+}
+
+.skeleton-fila-alumno-info {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+}
+
+.skeleton-ficha-datos-fila {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 0;
+}

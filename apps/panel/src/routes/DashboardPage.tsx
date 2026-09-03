@@ -3,6 +3,7 @@ import type { ResumenDashboardDTO } from "@fighters-gym/shared-types";
 import { useAuth } from "../lib/AuthContext.js";
 import { peticionApi } from "../lib/apiClient.js";
 import { PanelLayout } from "../components/PanelLayout.js";
+import { DashboardSkeleton } from "../components/PageSkeletons.js";
 
 const FORMATO_EURO = new Intl.NumberFormat("es-ES", { style: "currency", currency: "EUR" });
 
@@ -24,7 +25,9 @@ export function DashboardPage() {
     <PanelLayout titulo="Dashboard">
       {error !== null && <p className="mensaje-error">{error}</p>}
 
-      {resumen !== null && (
+      {resumen === null ? (
+        <DashboardSkeleton />
+      ) : (
         <>
           <div className="tarjetas-kpi">
             <TarjetaKpi valor={String(resumen.alumnosActivos)} etiqueta="Alumnos activos" />

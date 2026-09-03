@@ -3,6 +3,7 @@ import type { CuotaDelMesDTO, EstadoCuota, MetodoPago } from "@fighters-gym/shar
 import { useAuth } from "../lib/AuthContext.js";
 import { peticionApi } from "../lib/apiClient.js";
 import { PanelLayout } from "../components/PanelLayout.js";
+import { CuotasSkeleton } from "../components/PageSkeletons.js";
 
 const FORMATO_EURO = new Intl.NumberFormat("es-ES", { style: "currency", currency: "EUR" });
 
@@ -92,45 +93,48 @@ export function CuotasPage() {
     <PanelLayout titulo="Cuotas">
       {error !== null && <p className="mensaje-error">{error}</p>}
 
-      <div className="tarjetas-kpi tarjetas-kpi--cuotas">
-        <div className="tarjeta-kpi">
-          <div className="tarjeta-kpi-etiqueta">Cobrado</div>
-          <div className="tarjeta-kpi-valor display" style={{ color: "var(--color-exito)" }}>
-            {FORMATO_EURO.format(resumen.pagado.total)}
+      {cuotas === null ? (
+        <CuotasSkeleton />
+      ) : (
+        <>
+          <div className="tarjetas-kpi tarjetas-kpi--cuotas">
+            <div className="tarjeta-kpi">
+              <div className="tarjeta-kpi-etiqueta">Cobrado</div>
+              <div className="tarjeta-kpi-valor display" style={{ color: "var(--color-exito)" }}>
+                {FORMATO_EURO.format(resumen.pagado.total)}
+              </div>
+              <div className="texto-muted">{resumen.pagado.alumnos} alumnos</div>
+            </div>
+            <div className="tarjeta-kpi">
+              <div className="tarjeta-kpi-etiqueta">Pendiente</div>
+              <div className="tarjeta-kpi-valor display" style={{ color: "var(--color-aviso)" }}>
+                {FORMATO_EURO.format(resumen.pendiente.total)}
+              </div>
+              <div className="texto-muted">{resumen.pendiente.alumnos} alumnos</div>
+            </div>
+            <div className="tarjeta-kpi">
+              <div className="tarjeta-kpi-etiqueta">Atrasado</div>
+              <div className="tarjeta-kpi-valor display" style={{ color: "var(--color-error)" }}>
+                {FORMATO_EURO.format(resumen.atrasado.total)}
+              </div>
+              <div className="texto-muted">{resumen.atrasado.alumnos} alumnos</div>
+            </div>
           </div>
-          <div className="texto-muted">{resumen.pagado.alumnos} alumnos</div>
-        </div>
-        <div className="tarjeta-kpi">
-          <div className="tarjeta-kpi-etiqueta">Pendiente</div>
-          <div className="tarjeta-kpi-valor display" style={{ color: "var(--color-aviso)" }}>
-            {FORMATO_EURO.format(resumen.pendiente.total)}
-          </div>
-          <div className="texto-muted">{resumen.pendiente.alumnos} alumnos</div>
-        </div>
-        <div className="tarjeta-kpi">
-          <div className="tarjeta-kpi-etiqueta">Atrasado</div>
-          <div className="tarjeta-kpi-valor display" style={{ color: "var(--color-error)" }}>
-            {FORMATO_EURO.format(resumen.atrasado.total)}
-          </div>
-          <div className="texto-muted">{resumen.atrasado.alumnos} alumnos</div>
-        </div>
-      </div>
 
-      <div className="filtro-pills">
-        {FILTROS.map((opcion) => (
-          <button
-            key={opcion.valor}
-            type="button"
-            className={`filtro-pill${filtro === opcion.valor ? " filtro-pill--activo" : ""}`}
-            onClick={() => setFiltro(opcion.valor)}
-          >
-            {opcion.etiqueta}
-          </button>
-        ))}
-      </div>
+          <div className="filtro-pills">
+            {FILTROS.map((opcion) => (
+              <button
+                key={opcion.valor}
+                type="button"
+                className={`filtro-pill${filtro === opcion.valor ? " filtro-pill--activo" : ""}`}
+                onClick={() => setFiltro(opcion.valor)}
+              >
+                {opcion.etiqueta}
+              </button>
+            ))}
+          </div>
 
-      {cuotas !== null && (
-        <div className="lista-tarjeta">
+          <div className="lista-tarjeta">
           {cuotasFiltradas.length === 0 ? (
             <p className="lista-vacia">No hay cuotas que coincidan con este filtro.</p>
           ) : (
@@ -177,7 +181,8 @@ export function CuotasPage() {
               </div>
             ))
           )}
-        </div>
+          </div>
+        </>
       )}
     </PanelLayout>
   );
