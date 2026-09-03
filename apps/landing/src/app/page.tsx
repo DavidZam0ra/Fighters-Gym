@@ -14,7 +14,6 @@ export default function Home() {
         </div>
         <nav className="cabecera-nav">
           <a href="#disciplinas">Disciplinas</a>
-          <a href="#entrenador">Entrenador</a>
           <a href="#horarios">Horarios</a>
           <a href="#tarifas">Tarifas</a>
           <a href="#contacto">Ubicación</a>
@@ -51,43 +50,21 @@ export default function Home() {
             <h2 className="display">Disciplinas</h2>
             <p>Grupos reducidos, técnica de verdad y progresión adaptada a cada alumno.</p>
           </div>
-          <div className="disciplinas-grid">
+          <div className="disciplinas-lista">
             {DISCIPLINAS.map((disciplina, indice) => (
-              <div className="disciplina-tarjeta" key={disciplina.nombre}>
-                <IconoDisciplina indice={indice} />
-                <h3 className="display">{disciplina.nombre}</h3>
-                <p>{disciplina.descripcion}</p>
+              <div className="disciplina-panel" key={disciplina.nombre}>
+                <span className="disciplina-panel-indice display">{String(indice + 1).padStart(2, "0")}</span>
+                <div className="disciplina-panel-cuerpo">
+                  <IconoDisciplina indice={indice} />
+                  <h3 className="display">{disciplina.nombre}</h3>
+                  <p>{disciplina.descripcion}</p>
+                </div>
               </div>
             ))}
           </div>
           <div className="competicion-nota">
             <strong style={{ color: "var(--text)" }}>Competición</strong> — club federado, con grupo de
             preparación para quien quiere subirse al cuadrilátero o al tatami de verdad.
-          </div>
-        </div>
-      </section>
-
-      <section id="entrenador" className="seccion">
-        <div className="contenedor entrenador">
-          <div className="entrenador-foto">
-            <svg width="90" height="90" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.2}>
-              <circle cx="12" cy="8" r="4" />
-              <path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7" />
-            </svg>
-          </div>
-          <div>
-            <div className="entrenador-eyebrow">Fundador &amp; entrenador principal</div>
-            <h2 className="display">
-              Rafa Ros <span style={{ color: "var(--accent)" }}>— &ldquo;El Rosito&rdquo;</span>
-            </h2>
-            <p className="entrenador-credenciales">
-              Cinturón Negro 1<sup>er</sup> Dan Krav Maga · Entrenador titulado · Nutricionista
-            </p>
-            <p className="entrenador-bio">
-              Fundador de Fighters Gym. Bajo su dirección entrenan desde quien compite en federación hasta
-              quien viene por primera vez a aprender a defenderse o a ponerse en forma — el mismo trato
-              cercano para todos.
-            </p>
           </div>
         </div>
       </section>
@@ -189,7 +166,9 @@ export default function Home() {
               <h2 className="display">Ven a probarlo</h2>
               <div className="contacto-linea">
                 <IconoUbicacion />
-                <span>{CONTACTO.direccion}</span>
+                <a href={CONTACTO.googleMapsUrl} target="_blank" rel="noopener noreferrer">
+                  {CONTACTO.direccion}
+                </a>
               </div>
               <div className="contacto-linea">
                 <IconoTelefono />
@@ -200,22 +179,32 @@ export default function Home() {
                 <a href={`mailto:${CONTACTO.email}`}>{CONTACTO.email}</a>
               </div>
               <div className="contacto-redes">
-                <a className="contacto-red" href={CONTACTO.instagram}>
-                  IG
+                <a className="contacto-red" href={CONTACTO.instagram} aria-label="Instagram">
+                  <IconoInstagram />
                 </a>
-                <a className="contacto-red" href={CONTACTO.facebook}>
-                  FB
+                <a className="contacto-red" href={CONTACTO.facebook} aria-label="Facebook">
+                  <IconoFacebook />
                 </a>
-                <a className="contacto-red" href={CONTACTO.tiktok}>
-                  TT
+                <a className="contacto-red" href={CONTACTO.tiktok} aria-label="TikTok">
+                  <IconoTiktok />
                 </a>
               </div>
             </div>
             <div className="contacto-mapa">
-              <div className="contacto-mapa-contenido">
-                <IconoUbicacion tamano={30} />
-                <span>Mapa — pendiente de integrar</span>
-              </div>
+              <iframe
+                src={CONTACTO.googleMapsEmbedSrc}
+                title="Mapa de ubicación de Fighters Gym"
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+              />
+              <a
+                className="contacto-mapa-enlace"
+                href={CONTACTO.googleMapsUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Ver en Google Maps ↗
+              </a>
             </div>
           </div>
         </div>
@@ -321,6 +310,33 @@ function IconoEmail() {
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" strokeWidth={1.6}>
       <path d="M4 4h16v16H4z" />
       <path d="M4 6l8 7 8-7" />
+    </svg>
+  );
+}
+
+function IconoInstagram() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3" y="3" width="18" height="18" rx="5" />
+      <circle cx="12" cy="12" r="4" />
+      <circle cx="17.3" cy="6.7" r="1" fill="currentColor" stroke="none" />
+    </svg>
+  );
+}
+
+function IconoFacebook() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
+      <path d="M15 3h-2a4 4 0 0 0-4 4v3H6v4h3v7h4v-7h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
+    </svg>
+  );
+}
+
+function IconoTiktok() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
+      <path d="M14 3v10.8a3.6 3.6 0 1 1-3-3.55" />
+      <path d="M14 3c.3 2.6 2.2 4.6 4.8 4.8" />
     </svg>
   );
 }

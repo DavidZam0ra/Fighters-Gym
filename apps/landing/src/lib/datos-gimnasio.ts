@@ -9,6 +9,12 @@ export const CONTACTO = {
   facebook: "https://www.facebook.com/fightersgymclub/",
   tiktok: "https://www.tiktok.com/@fightersgymclub",
   tienda: "https://fightersgym.myspreadshop.es",
+  // Coordenadas reales de la ficha de Google Maps del gimnasio (confirmadas
+  // por el enlace que compartió Rafa), no las del centro del mapa al hacer
+  // zoom — esas se mueven según el nivel de zoom, el pin no.
+  googleMapsUrl:
+    "https://www.google.com/maps/place/FIGHTERS+GYM+(Club+de+Boxeo+y+Lucha)/@39.5104471,-0.3599846,838m/data=!3m2!1e3!4b1!4m6!3m5!1s0xd6047dd99a9011d:0x4cd8cf4599cfcdf6!8m2!3d39.510443!4d-0.3574097!16s%2Fg%2F11m_j9ptmr",
+  googleMapsEmbedSrc: "https://www.google.com/maps?q=39.510443,-0.3574097&z=17&output=embed",
 };
 
 export const WHATSAPP_CTA = `https://wa.me/${CONTACTO.telefonoInternacional}?text=${encodeURIComponent(
