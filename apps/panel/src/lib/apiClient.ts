@@ -13,9 +13,15 @@ export class ApiError extends Error {
 interface PeticionOptions {
   method?: string;
   body?: unknown;
+  accessToken?: string;
 }
 
 export async function peticionApi<T>(ruta: string, opciones: PeticionOptions = {}): Promise<T> {
+  const headers: Record<string, string> = {};
+  if (opciones.accessToken !== undefined) {
+    headers["Authorization"] = `Bearer ${opciones.accessToken}`;
+  }
+
   const init: RequestInit = {
     method: opciones.method ?? "GET",
     // Necesario para que la cookie httpOnly del refresh token viaje en
@@ -26,8 +32,11 @@ export async function peticionApi<T>(ruta: string, opciones: PeticionOptions = {
   // rechaza con error un application/json con cuerpo vacío (p. ej. en
   // /auth/refresh, que no lleva body).
   if (opciones.body !== undefined) {
-    init.headers = { "Content-Type": "application/json" };
+    headers["Content-Type"] = "application/json";
     init.body = JSON.stringify(opciones.body);
+  }
+  if (Object.keys(headers).length > 0) {
+    init.headers = headers;
   }
 
   const respuesta = await fetch(`${API_URL}${ruta}`, init);

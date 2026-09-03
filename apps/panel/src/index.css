@@ -13,6 +13,10 @@
   --text-muted: #a39d99;
   --text-faint: #6d6864;
   --accent: #e8432c;
+  --color-aviso: #f2b134;
+  --color-error: #ff5252;
+  --color-exito: #3ecf6e;
+  --color-info: #8a3dff;
 }
 
 html,
@@ -185,33 +189,6 @@ button:disabled {
   color: var(--text-muted);
 }
 
-/* ---------- Home (shell mínimo del Paso 6 — el Dashboard real llega en el
-   Paso 7; aun así, cabecera y contenido ya siguen el patrón responsive
-   mobile-first + desktop que se reutilizará en el resto de pantallas) ---------- */
-
-.pantalla-home {
-  min-height: 100dvh;
-  display: flex;
-  flex-direction: column;
-}
-
-.home-cabecera {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 14px 16px;
-  border-bottom: 1px solid var(--border);
-  background: var(--bg-elevated);
-}
-
-.home-marca {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 16px;
-}
-
 .boton-secundario {
   background: transparent;
   border: 1px solid var(--border);
@@ -227,20 +204,381 @@ button:disabled {
   color: var(--text);
 }
 
-.home-contenido {
+.mensaje-error {
+  color: var(--color-error);
+  font-size: 13px;
+}
+
+.lista-vacia {
+  color: var(--text-muted);
+  font-size: 13px;
+  padding: 16px;
+  margin: 0;
+}
+
+/* ---------- Panel: sidebar en escritorio, barra de pestañas abajo en móvil.
+   Mobile-first a propósito (Rafa gestiona todo desde el móvil), pero con un
+   layout de escritorio propio, no un simple "que no se rompa". ---------- */
+
+.panel-shell {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+.panel-sidebar {
+  display: none;
+}
+
+.panel-marca {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 8px 24px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 20px;
+  font-size: 14px;
+}
+
+.panel-nav-titulo {
+  font-size: 11px;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  padding: 0 12px;
+  margin-bottom: 8px;
+}
+
+.panel-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-bottom: 20px;
+}
+
+.panel-nav-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 12px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  border-radius: 10px;
+}
+
+.panel-nav-link:hover {
+  color: var(--text);
+}
+
+.panel-nav-link--activo {
+  background: var(--accent);
+  color: var(--text);
+  font-weight: 600;
+}
+
+.panel-nav-link--proximamente {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.panel-usuario {
+  margin-top: auto;
+  padding: 12px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.panel-usuario-avatar {
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--accent);
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.panel-usuario-info {
+  min-width: 0;
+}
+
+.panel-usuario-nombre {
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.panel-usuario-rol {
+  font-size: 11px;
+  color: var(--text-faint);
+}
+
+.panel-principal {
   flex: 1;
-  padding: 24px 16px;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding-bottom: 64px;
+}
+
+.panel-topbar {
+  height: 60px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 0 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.panel-topbar-titulo {
+  font-size: 16px;
+}
+
+.panel-topbar-derecha {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.panel-topbar-fecha {
+  font-size: 12px;
+  color: var(--text-faint);
+  display: none;
+}
+
+.panel-contenido {
+  flex: 1;
+  padding: 20px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.panel-tabbar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  background: var(--bg-elevated);
+  border-top: 1px solid var(--border);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.panel-tabbar-link {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 10px 4px 8px;
+  font-size: 11px;
+  color: var(--text-faint);
+}
+
+.panel-tabbar-link--activo {
+  color: var(--accent);
+}
+
+.panel-tabbar-link--proximamente {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Tarjetas KPI del dashboard */
+
+.tarjetas-kpi {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+}
+
+.tarjeta-kpi {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 16px;
+}
+
+.tarjeta-kpi-valor {
+  font-size: 26px;
+  margin-top: 8px;
+}
+
+.tarjeta-kpi-etiqueta {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+.dashboard-columnas {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.seccion-cabecera {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.seccion-cabecera h2 {
+  font-size: 16px;
+  margin: 0;
+}
+
+.lista-tarjeta {
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.fila-lista {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.fila-lista:last-child {
+  border-bottom: none;
+}
+
+.fila-lista-titulo {
+  font-size: 13px;
+  font-weight: 500;
+  flex: 1;
+}
+
+.etiqueta-estado {
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.etiqueta-estado--atrasado {
+  color: var(--color-error);
+}
+
+.etiqueta-estado--pendiente {
+  color: var(--color-aviso);
+}
+
+/* Alumnos */
+
+.campo-busqueda {
+  width: 100%;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 14px;
+  font-size: 14px;
+  color: var(--text);
+  outline: none;
+}
+
+.campo-busqueda:focus {
+  border-color: var(--accent);
+}
+
+.fila-alumno {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.fila-alumno:last-child {
+  border-bottom: none;
+}
+
+.fila-alumno-avatar {
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--border);
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.fila-alumno-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.fila-alumno-nombre {
+  font-size: 14px;
+  font-weight: 600;
 }
 
 @media (min-width: 768px) {
-  .home-cabecera {
-    padding: 18px 32px;
+  .panel-shell {
+    flex-direction: row;
   }
 
-  .home-contenido {
-    padding: 40px 32px;
-    max-width: 960px;
-    margin: 0 auto;
+  .panel-sidebar {
+    display: flex;
+    flex-direction: column;
+    width: 232px;
+    flex-shrink: 0;
+    background: #0a0a0b;
+    border-right: 1px solid var(--border);
+    padding: 24px 16px;
+  }
+
+  .panel-principal {
+    padding-bottom: 0;
+  }
+
+  .panel-topbar {
+    height: 68px;
+    padding: 0 28px;
+  }
+
+  .panel-topbar-fecha {
+    display: inline;
+  }
+
+  .panel-contenido {
+    padding: 28px;
+    max-width: 1100px;
     width: 100%;
+    margin: 0 auto;
+  }
+
+  .panel-tabbar {
+    display: none;
+  }
+
+  .tarjetas-kpi {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  .dashboard-columnas {
+    flex-direction: row;
+  }
+
+  .dashboard-columnas > section {
+    flex: 1;
   }
 }

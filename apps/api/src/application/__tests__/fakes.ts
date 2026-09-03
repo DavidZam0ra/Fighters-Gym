@@ -1,6 +1,7 @@
 import type { AlumnoRepository } from "../ports/out/AlumnoRepository.js";
 import type { CuotaRepository } from "../ports/out/CuotaRepository.js";
 import type { AsistenciaRepository } from "../ports/out/AsistenciaRepository.js";
+import type { ClaseRepository } from "../ports/out/ClaseRepository.js";
 import type { UsuarioRepository } from "../ports/out/UsuarioRepository.js";
 import type { PasswordHasher } from "../ports/out/PasswordHasher.js";
 import type { TokenService, TokenPair } from "../ports/out/TokenService.js";
@@ -13,6 +14,7 @@ import type { Alumno } from "../../domain/alumno/Alumno.js";
 import type { Cuota } from "../../domain/cuota/Cuota.js";
 import type { Periodo } from "../../domain/cuota/Periodo.js";
 import type { Asistencia } from "../../domain/asistencia/Asistencia.js";
+import type { Clase } from "../../domain/clase/Clase.js";
 import type { Usuario } from "../../domain/usuario/Usuario.js";
 import { PasswordHash } from "../../domain/usuario/PasswordHash.js";
 
@@ -55,6 +57,28 @@ export class CuotaRepositoryFake implements CuotaRepository {
 
   async listarPorAlumno(alumnoId: string, limite: number): Promise<Cuota[]> {
     return [...this.porId.values()].filter((c) => c.alumnoId === alumnoId).slice(0, limite);
+  }
+
+  async listarPagadasEntre(desde: Date, hasta: Date): Promise<Cuota[]> {
+    return [...this.porId.values()].filter(
+      (c) => c.fechaPago !== null && c.fechaPago >= desde && c.fechaPago < hasta
+    );
+  }
+
+  async listarNoPagadas(): Promise<Cuota[]> {
+    return [...this.porId.values()].filter((c) => c.fechaPago === null);
+  }
+}
+
+export class ClaseRepositoryFake implements ClaseRepository {
+  private readonly clases: Clase[] = [];
+
+  async agregar(clase: Clase): Promise<void> {
+    this.clases.push(clase);
+  }
+
+  async listarTodas(): Promise<Clase[]> {
+    return [...this.clases];
   }
 }
 

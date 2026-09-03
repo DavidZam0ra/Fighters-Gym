@@ -78,3 +78,33 @@ export interface LoginRequestDTO {
 export interface LoginResponseDTO {
   accessToken: string;
 }
+
+export type Rol = "admin" | "profesor";
+
+export interface UsuarioActualDTO {
+  id: string;
+  nombre: string;
+  email: string;
+  rol: Rol;
+}
+
+export interface CuotaPendienteResumenDTO {
+  alumnoId: string;
+  nombreAlumno: string;
+  estado: "pendiente" | "atrasado";
+}
+
+export interface ClaseDeHoyDTO {
+  id: string;
+  nombre: string;
+  horaInicio: string;
+}
+
+export interface ResumenDashboardDTO {
+  alumnosActivos: number;
+  cuotasPendientes: number;
+  clasesHoy: number;
+  cobradoEsteMes: number;
+  cuotasAtrasadas: CuotaPendienteResumenDTO[];
+  horarioHoy: ClaseDeHoyDTO[];
+}

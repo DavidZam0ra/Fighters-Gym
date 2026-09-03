@@ -4,18 +4,23 @@ import cookie from "@fastify/cookie";
 import { registrarManejadorErrores } from "../errorHandler.js";
 import { registrarRutasAuth } from "../routes/auth.routes.js";
 import { registrarRutasAlumnos } from "../routes/alumno.routes.js";
+import { registrarRutasUsuario } from "../routes/usuario.routes.js";
+import { registrarRutasDashboard } from "../routes/dashboard.routes.js";
 import { crearAuthenticate } from "../middleware/authenticate.js";
 import type { Container } from "../../../composition-root/container.js";
 import { LoginUseCase } from "../../../application/use-cases/auth/LoginUseCase.js";
 import { RefrescarTokenUseCase } from "../../../application/use-cases/auth/RefrescarTokenUseCase.js";
+import { ObtenerUsuarioActualUseCase } from "../../../application/use-cases/auth/ObtenerUsuarioActualUseCase.js";
 import { CrearAlumnoUseCase } from "../../../application/use-cases/alumno/CrearAlumnoUseCase.js";
 import { ListarAlumnosUseCase } from "../../../application/use-cases/alumno/ListarAlumnosUseCase.js";
 import { ObtenerFichaAlumnoUseCase } from "../../../application/use-cases/alumno/ObtenerFichaAlumnoUseCase.js";
 import { DarDeBajaAlumnoUseCase } from "../../../application/use-cases/alumno/DarDeBajaAlumnoUseCase.js";
+import { ObtenerResumenDashboardUseCase } from "../../../application/use-cases/dashboard/ObtenerResumenDashboardUseCase.js";
 import {
   AlumnoRepositoryFake,
   CuotaRepositoryFake,
   AsistenciaRepositoryFake,
+  ClaseRepositoryFake,
   UsuarioRepositoryFake,
   PasswordHasherFake,
   TokenServiceFake,
@@ -30,6 +35,7 @@ async function construirApp(): Promise<{ app: FastifyInstance; tokens: TokenServ
   const alumnos = new AlumnoRepositoryFake();
   const cuotas = new CuotaRepositoryFake();
   const asistencias = new AsistenciaRepositoryFake();
+  const clases = new ClaseRepositoryFake();
   const hasher = new PasswordHasherFake();
   const tokens = new TokenServiceFake();
   const clock = new ClockFake(new Date("2026-09-02T00:00:00Z"));
@@ -53,6 +59,8 @@ async function construirApp(): Promise<{ app: FastifyInstance; tokens: TokenServ
     listarAlumnosUseCase: new ListarAlumnosUseCase(alumnos),
     obtenerFichaAlumnoUseCase: new ObtenerFichaAlumnoUseCase(alumnos, cuotas, asistencias),
     darDeBajaAlumnoUseCase: new DarDeBajaAlumnoUseCase(alumnos),
+    obtenerUsuarioActualUseCase: new ObtenerUsuarioActualUseCase(usuarios),
+    obtenerResumenDashboardUseCase: new ObtenerResumenDashboardUseCase(alumnos, cuotas, clases, clock),
   };
 
   const app = Fastify();
@@ -60,6 +68,8 @@ async function construirApp(): Promise<{ app: FastifyInstance; tokens: TokenServ
   await app.register(cookie);
   registrarRutasAuth(app, container);
   registrarRutasAlumnos(app, container);
+  registrarRutasUsuario(app, container);
+  registrarRutasDashboard(app, container);
   await app.ready();
 
   return { app, tokens };
@@ -197,5 +207,56 @@ describe("Rutas de alumnos", () => {
     });
 
     expect(respuesta.statusCode).toBe(404);
+  });
+});
+
+describe("GET /auth/me", () => {
+  it("exige autenticación", async () => {
+    const { app } = await construirApp();
+    const respuesta = await app.inject({ method: "GET", url: "/auth/me" });
+    expect(respuesta.statusCode).toBe(401);
+  });
+
+  it("devuelve los datos del usuario autenticado", async () => {
+    const { app, tokens } = await construirApp();
+    const { accessToken } = await tokens.emitir("usuario-1");
+
+    const respuesta = await app.inject({
+      method: "GET",
+      url: "/auth/me",
+      headers: { authorization: `Bearer ${accessToken}` },
+    });
+
+    expect(respuesta.statusCode).toBe(200);
+    expect(respuesta.json()).toMatchObject({ id: "usuario-1", email: EMAIL_ADMIN, rol: "admin" });
+  });
+});
+
+describe("GET /dashboard/resumen", () => {
+  it("exige autenticación", async () => {
+    const { app } = await construirApp();
+    const respuesta = await app.inject({ method: "GET", url: "/dashboard/resumen" });
+    expect(respuesta.statusCode).toBe(401);
+  });
+
+  it("devuelve un resumen vacío coherente cuando no hay datos", async () => {
+    const { app, tokens } = await construirApp();
+    const { accessToken } = await tokens.emitir("usuario-1");
+
+    const respuesta = await app.inject({
+      method: "GET",
+      url: "/dashboard/resumen",
+      headers: { authorization: `Bearer ${accessToken}` },
+    });
+
+    expect(respuesta.statusCode).toBe(200);
+    expect(respuesta.json()).toEqual({
+      alumnosActivos: 0,
+      cuotasPendientes: 0,
+      clasesHoy: 0,
+      cobradoEsteMes: 0,
+      cuotasAtrasadas: [],
+      horarioHoy: [],
+    });
   });
 });

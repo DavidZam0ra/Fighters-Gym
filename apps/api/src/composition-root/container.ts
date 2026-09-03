@@ -4,6 +4,7 @@ import { PrismaAlumnoRepository } from "../infrastructure/adapters/db/PrismaAlum
 import { PrismaCuotaRepository } from "../infrastructure/adapters/db/PrismaCuotaRepository.js";
 import { PrismaAsistenciaRepository } from "../infrastructure/adapters/db/PrismaAsistenciaRepository.js";
 import { PrismaUsuarioRepository } from "../infrastructure/adapters/db/PrismaUsuarioRepository.js";
+import { PrismaClaseRepository } from "../infrastructure/adapters/db/PrismaClaseRepository.js";
 import { BcryptPasswordHasher } from "../infrastructure/adapters/auth/BcryptPasswordHasher.js";
 import { JwtTokenService } from "../infrastructure/adapters/auth/JwtTokenService.js";
 import { SystemClock } from "../infrastructure/adapters/clock/SystemClock.js";
@@ -15,6 +16,8 @@ import { CrearAlumnoUseCase } from "../application/use-cases/alumno/CrearAlumnoU
 import { ListarAlumnosUseCase } from "../application/use-cases/alumno/ListarAlumnosUseCase.js";
 import { ObtenerFichaAlumnoUseCase } from "../application/use-cases/alumno/ObtenerFichaAlumnoUseCase.js";
 import { DarDeBajaAlumnoUseCase } from "../application/use-cases/alumno/DarDeBajaAlumnoUseCase.js";
+import { ObtenerUsuarioActualUseCase } from "../application/use-cases/auth/ObtenerUsuarioActualUseCase.js";
+import { ObtenerResumenDashboardUseCase } from "../application/use-cases/dashboard/ObtenerResumenDashboardUseCase.js";
 
 export interface EnvConfig {
   jwtAccessSecret: string;
@@ -36,6 +39,8 @@ export interface Container {
   listarAlumnosUseCase: ListarAlumnosUseCase;
   obtenerFichaAlumnoUseCase: ObtenerFichaAlumnoUseCase;
   darDeBajaAlumnoUseCase: DarDeBajaAlumnoUseCase;
+  obtenerUsuarioActualUseCase: ObtenerUsuarioActualUseCase;
+  obtenerResumenDashboardUseCase: ObtenerResumenDashboardUseCase;
 }
 
 export function crearContainer(env: EnvConfig): Container {
@@ -43,6 +48,7 @@ export function crearContainer(env: EnvConfig): Container {
   const cuotaRepository = new PrismaCuotaRepository(prisma);
   const asistenciaRepository = new PrismaAsistenciaRepository(prisma);
   const usuarioRepository = new PrismaUsuarioRepository(prisma);
+  const claseRepository = new PrismaClaseRepository(prisma);
 
   const passwordHasher = new BcryptPasswordHasher();
   const tokenService = new JwtTokenService({
@@ -64,5 +70,12 @@ export function crearContainer(env: EnvConfig): Container {
       asistenciaRepository
     ),
     darDeBajaAlumnoUseCase: new DarDeBajaAlumnoUseCase(alumnoRepository),
+    obtenerUsuarioActualUseCase: new ObtenerUsuarioActualUseCase(usuarioRepository),
+    obtenerResumenDashboardUseCase: new ObtenerResumenDashboardUseCase(
+      alumnoRepository,
+      cuotaRepository,
+      claseRepository,
+      clock
+    ),
   };
 }
