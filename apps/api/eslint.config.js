@@ -7,6 +7,18 @@ export default tseslint.config(
   },
   ...tseslint.configs.recommended,
   {
+    // Fija explícitamente la raíz en vez de dejar que typescript-eslint la
+    // infiera del call stack: en un monorepo, si el proceso de ESLint del
+    // editor carga los eslint.config.js de varios paquetes (api, landing,
+    // panel) en el mismo proceso, esa inferencia encuentra más de un
+    // candidato y lanza "multiple candidate TSConfigRootDirs".
+    languageOptions: {
+      parserOptions: {
+        tsconfigRootDir: import.meta.dirname,
+      },
+    },
+  },
+  {
     // Default rule for the whole app: nobody may import the generated Prisma
     // client directly. Only the db adapters (next block) are exempted.
     // This is what keeps Prisma's generated types from leaking past the
