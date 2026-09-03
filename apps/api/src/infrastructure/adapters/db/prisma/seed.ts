@@ -39,6 +39,66 @@ async function main(): Promise<void> {
     update: {},
   });
   console.log("Configuración del gimnasio sembrada correctamente.");
+
+  for (const clase of CLASES) {
+    await prisma.clase.upsert({
+      where: { id: clase.id },
+      create: clase,
+      update: clase,
+    });
+  }
+  console.log(`${CLASES.length} clases del horario semanal sembradas correctamente.`);
+}
+
+// Horario real del gimnasio (de las fotos de los flyers de Rafa), de lunes a
+// viernes — sábado es competición variable y domingo cerrado, así que no
+// entran en esta rejilla fija semanal.
+const CLASES = [
+  ...franjaBoxeo("box-1115", "11:15", "12:15"),
+  ...franjaBoxeo("box-1700", "17:00", "18:00"),
+  { id: "box-inf-1800-lun", nombre: "Boxeo infantil", disciplina: "boxeo_infantil", diaSemana: "lunes", horaInicio: "18:00", horaFin: "19:00", esInfantil: true, esSparring: false },
+  { id: "kick-1800-lun", nombre: "Kickboxing / Muay Thai", disciplina: "kickboxing", diaSemana: "lunes", horaInicio: "18:00", horaFin: "19:00", esInfantil: false, esSparring: false },
+  { id: "krav-inf-1800-mar", nombre: "Krav Maga infantil", disciplina: "krav_maga_infantil", diaSemana: "martes", horaInicio: "18:00", horaFin: "19:00", esInfantil: true, esSparring: false },
+  { id: "krav-1800-mar", nombre: "Krav Maga", disciplina: "krav_maga", diaSemana: "martes", horaInicio: "18:00", horaFin: "19:00", esInfantil: false, esSparring: false },
+  { id: "box-inf-1800-mie", nombre: "Boxeo infantil", disciplina: "boxeo_infantil", diaSemana: "miercoles", horaInicio: "18:00", horaFin: "19:00", esInfantil: true, esSparring: false },
+  { id: "kick-1800-mie", nombre: "Kickboxing / Muay Thai", disciplina: "kickboxing", diaSemana: "miercoles", horaInicio: "18:00", horaFin: "19:00", esInfantil: false, esSparring: false },
+  { id: "krav-inf-1800-jue", nombre: "Krav Maga infantil", disciplina: "krav_maga_infantil", diaSemana: "jueves", horaInicio: "18:00", horaFin: "19:00", esInfantil: true, esSparring: false },
+  { id: "krav-1800-jue", nombre: "Krav Maga", disciplina: "krav_maga", diaSemana: "jueves", horaInicio: "18:00", horaFin: "19:00", esInfantil: false, esSparring: false },
+  { id: "box-inf-1800-vie", nombre: "Boxeo infantil", disciplina: "boxeo_infantil", diaSemana: "viernes", horaInicio: "18:00", horaFin: "19:00", esInfantil: true, esSparring: false },
+  { id: "kick-spar-1800-vie", nombre: "Kickboxing · sparring", disciplina: "kickboxing", diaSemana: "viernes", horaInicio: "18:00", horaFin: "19:00", esInfantil: false, esSparring: true },
+  { id: "mma-1900-lun", nombre: "MMA / Grappling", disciplina: "mma", diaSemana: "lunes", horaInicio: "19:00", horaFin: "20:00", esInfantil: false, esSparring: false },
+  { id: "jj-1900-mar", nombre: "Jiu-Jitsu", disciplina: "jiu_jitsu", diaSemana: "martes", horaInicio: "19:00", horaFin: "20:00", esInfantil: false, esSparring: false },
+  { id: "mma-1900-mie", nombre: "MMA / Grappling", disciplina: "mma", diaSemana: "miercoles", horaInicio: "19:00", horaFin: "20:00", esInfantil: false, esSparring: false },
+  { id: "jj-1900-jue", nombre: "Jiu-Jitsu", disciplina: "jiu_jitsu", diaSemana: "jueves", horaInicio: "19:00", horaFin: "20:00", esInfantil: false, esSparring: false },
+  { id: "mma-spar-1900-vie", nombre: "MMA · sparring", disciplina: "mma", diaSemana: "viernes", horaInicio: "19:00", horaFin: "20:00", esInfantil: false, esSparring: true },
+  { id: "jj-spar-1900-vie", nombre: "Jiu-Jitsu · sparring", disciplina: "jiu_jitsu", diaSemana: "viernes", horaInicio: "19:00", horaFin: "20:00", esInfantil: false, esSparring: true },
+  ...franjaBoxeo("box-2000", "20:00", "21:00"),
+] as const;
+
+function franjaBoxeo(prefijoId: string, horaInicio: string, horaFin: string) {
+  const dias = ["lunes", "martes", "miercoles", "jueves"] as const;
+  return [
+    ...dias.map((dia) => ({
+      id: `${prefijoId}-${dia.slice(0, 3)}`,
+      nombre: "Boxeo",
+      disciplina: "boxeo" as const,
+      diaSemana: dia,
+      horaInicio,
+      horaFin,
+      esInfantil: false,
+      esSparring: false,
+    })),
+    {
+      id: `${prefijoId}-vie`,
+      nombre: "Boxeo · sparring",
+      disciplina: "boxeo" as const,
+      diaSemana: "viernes" as const,
+      horaInicio,
+      horaFin,
+      esInfantil: false,
+      esSparring: true,
+    },
+  ];
 }
 
 main()

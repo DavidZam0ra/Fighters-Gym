@@ -888,3 +888,113 @@ button:disabled {
     justify-self: end;
   }
 }
+
+/* ---------- Calendario ---------- */
+
+.calendario-selector-dia {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.calendario-hora-movil {
+  font-size: 12px;
+  color: var(--text-faint);
+  min-width: 48px;
+}
+
+.calendario-tabla {
+  display: none;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.calendario-fila {
+  display: grid;
+  grid-template-columns: 70px repeat(5, 1fr);
+  border-top: 1px solid var(--border-subtle);
+}
+
+.calendario-fila--cabecera {
+  border-top: none;
+  border-bottom: 1px solid var(--border);
+}
+
+.calendario-dia-cabecera {
+  padding: 12px;
+  font-size: 11px;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  text-align: center;
+  border-left: 1px solid var(--border);
+}
+
+.calendario-hora {
+  padding: 10px;
+  font-size: 11px;
+  color: var(--text-faint);
+}
+
+.calendario-celda {
+  padding: 6px;
+  border-left: 1px solid var(--border-subtle);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.calendario-nota {
+  font-size: 12px;
+}
+
+.clase-bloque {
+  border-radius: 6px;
+  padding: 6px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.clase-bloque--boxeo,
+.clase-bloque--krav {
+  background: var(--accent);
+}
+
+.clase-bloque--infantil {
+  background: #8a4f5e;
+}
+
+.clase-bloque--krav-inf {
+  background: #3f7a75;
+}
+
+.clase-bloque--kick {
+  background: #ff9d3d;
+  color: #121113;
+}
+
+.clase-bloque--mma {
+  background: #8a3dff;
+}
+
+.clase-bloque--jj {
+  background: #6b7a4a;
+}
+
+/* Este @media va deliberadamente al final del fichero: es un override de
+   escritorio y debe venir DESPUÉS de las reglas base de las que arriba,
+   o la cascada (misma especificidad, orden de aparición) las ignora sin
+   importar el viewport. Ya nos pasó una vez con .ficha-layout — lección
+   aprendida: los overrides responsive siempre van al final. */
+@media (min-width: 768px) {
+  .calendario-selector-dia,
+  .calendario-lista-movil {
+    display: none;
+  }
+
+  .calendario-tabla {
+    display: block;
+  }
+}

@@ -9,6 +9,7 @@ import { registrarRutasAlumnos } from "./routes/alumno.routes.js";
 import { registrarRutasUsuario } from "./routes/usuario.routes.js";
 import { registrarRutasDashboard } from "./routes/dashboard.routes.js";
 import { registrarRutasCuotas } from "./routes/cuota.routes.js";
+import { registrarRutasClases } from "./routes/clase.routes.js";
 
 const PUERTO = Number(process.env["PORT"] ?? 4000);
 
@@ -36,6 +37,7 @@ async function main(): Promise<void> {
   registrarRutasUsuario(app, container);
   registrarRutasDashboard(app, container);
   registrarRutasCuotas(app, container);
+  registrarRutasClases(app, container);
 
   await app.listen({ port: PUERTO, host: "0.0.0.0" });
 }

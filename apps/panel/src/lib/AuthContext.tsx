@@ -11,7 +11,7 @@ interface AuthContextValue {
   usuario: UsuarioActualDTO | null;
   cargandoSesion: boolean;
   login: (email: string, password: string) => Promise<void>;
-  logout: () => void;
+  logout: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -51,8 +51,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setAccessToken(respuesta.accessToken);
   }
 
-  function logout(): void {
-    setAccessToken(null);
+  async function logout(): Promise<void> {
+    // Necesario de verdad, no un simple "olvidar el token": borra la cookie
+    // httpOnly de refresco en el servidor. Sin esto, un F5 tras "Salir"
+    // volvería a iniciar sesión solo con la cookie todavía viva.
+    try {
+      await peticionApi("/auth/logout", { method: "POST" });
+    } finally {
+      setAccessToken(null);
+    }
   }
 
   const value = useMemo(

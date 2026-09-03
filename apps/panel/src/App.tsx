@@ -6,6 +6,7 @@ import { DashboardPage } from "./routes/DashboardPage.js";
 import { AlumnosPage } from "./routes/AlumnosPage.js";
 import { FichaAlumnoPage } from "./routes/FichaAlumnoPage.js";
 import { CuotasPage } from "./routes/CuotasPage.js";
+import { CalendarioPage } from "./routes/CalendarioPage.js";
 
 export function App() {
   return (
@@ -19,6 +20,7 @@ export function App() {
             <Route path="/alumnos" element={<AlumnosPage />} />
             <Route path="/alumnos/:id" element={<FichaAlumnoPage />} />
             <Route path="/cuotas" element={<CuotasPage />} />
+            <Route path="/calendario" element={<CalendarioPage />} />
           </Route>
           <Route path="*" element={<Navigate to="/home" replace />} />
         </Routes>

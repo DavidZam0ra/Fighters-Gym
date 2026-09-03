@@ -43,6 +43,14 @@ export function registrarRutasAuth(app: FastifyInstance, container: Container): 
       throw error;
     }
   });
+
+  app.post("/auth/logout", async (_request, reply) => {
+    // El logout real pasa por aquí: borrar la cookie httpOnly en el servidor.
+    // Si solo se olvidara el access token en el cliente, la cookie de
+    // refresco seguiría viva y un simple F5 volvería a iniciar sesión solo.
+    reply.clearCookie(NOMBRE_COOKIE_REFRESH, { path: "/auth" });
+    return reply.code(204).send();
+  });
 }
 
 function fijarCookieRefresh(reply: FastifyReply, valor: string): void {

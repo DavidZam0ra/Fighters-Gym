@@ -14,7 +14,7 @@ interface EnlaceNav {
 const ENLACES_NAV: EnlaceNav[] = [
   { to: "/home", etiqueta: "Dashboard", icono: "dashboard" },
   { to: "/alumnos", etiqueta: "Alumnos", icono: "alumnos" },
-  { to: "/calendario", etiqueta: "Calendario", icono: "calendario", proximamente: true },
+  { to: "/calendario", etiqueta: "Calendario", icono: "calendario" },
   { to: "/cuotas", etiqueta: "Cuotas", icono: "cuotas" },
 ];
 
@@ -67,7 +67,7 @@ export function PanelLayout({ children, titulo }: { children: ReactNode; titulo:
           <span className="panel-topbar-titulo display">{titulo}</span>
           <div className="panel-topbar-derecha">
             <span className="panel-topbar-fecha">{fecha}</span>
-            <button type="button" className="boton-secundario" onClick={logout}>
+            <button type="button" className="boton-secundario" onClick={() => void logout()}>
               Salir
             </button>
           </div>

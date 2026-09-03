@@ -22,6 +22,7 @@ export type EstadoAlumno = "activo" | "dado_de_baja";
 export type EstadoCuota = "pagado" | "pendiente" | "atrasado";
 export type MetodoPago = "bizum" | "transferencia" | "efectivo";
 export type EstadoAsistencia = "asistio" | "justificada" | "sin_avisar";
+export type DiaSemana = "lunes" | "martes" | "miercoles" | "jueves" | "viernes";
 
 export interface AlumnoDTO {
   id: string;
@@ -87,6 +88,17 @@ export interface CuotaDelMesDTO {
 
 export interface ConfirmarPagoRequestDTO {
   metodo: MetodoPago;
+}
+
+export interface ClaseDTO {
+  id: string;
+  nombre: string;
+  disciplina: Disciplina;
+  diaSemana: DiaSemana;
+  horaInicio: string;
+  horaFin: string;
+  esInfantil: boolean;
+  esSparring: boolean;
 }
 
 export interface LoginRequestDTO {

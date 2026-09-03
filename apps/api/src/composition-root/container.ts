@@ -22,6 +22,7 @@ import { ObtenerResumenDashboardUseCase } from "../application/use-cases/dashboa
 import { RegistrarCuotasDelMesUseCase } from "../application/use-cases/cuota/RegistrarCuotasDelMesUseCase.js";
 import { ListarCuotasDelMesUseCase } from "../application/use-cases/cuota/ListarCuotasDelMesUseCase.js";
 import { ConfirmarPagoUseCase } from "../application/use-cases/cuota/ConfirmarPagoUseCase.js";
+import { ListarClasesUseCase } from "../application/use-cases/clase/ListarClasesUseCase.js";
 
 export interface EnvConfig {
   jwtAccessSecret: string;
@@ -48,6 +49,7 @@ export interface Container {
   obtenerResumenDashboardUseCase: ObtenerResumenDashboardUseCase;
   listarCuotasDelMesUseCase: ListarCuotasDelMesUseCase;
   confirmarPagoUseCase: ConfirmarPagoUseCase;
+  listarClasesUseCase: ListarClasesUseCase;
 }
 
 export function crearContainer(env: EnvConfig): Container {
@@ -92,5 +94,6 @@ export function crearContainer(env: EnvConfig): Container {
       clock
     ),
     confirmarPagoUseCase: new ConfirmarPagoUseCase(cuotaRepository, clock),
+    listarClasesUseCase: new ListarClasesUseCase(claseRepository),
   };
 }
