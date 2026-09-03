@@ -6,6 +6,7 @@ import { registrarRutasAuth } from "../routes/auth.routes.js";
 import { registrarRutasAlumnos } from "../routes/alumno.routes.js";
 import { registrarRutasUsuario } from "../routes/usuario.routes.js";
 import { registrarRutasDashboard } from "../routes/dashboard.routes.js";
+import { registrarRutasCuotas } from "../routes/cuota.routes.js";
 import { crearAuthenticate } from "../middleware/authenticate.js";
 import type { Container } from "../../../composition-root/container.js";
 import { LoginUseCase } from "../../../application/use-cases/auth/LoginUseCase.js";
@@ -17,6 +18,9 @@ import { ObtenerFichaAlumnoUseCase } from "../../../application/use-cases/alumno
 import { DarDeBajaAlumnoUseCase } from "../../../application/use-cases/alumno/DarDeBajaAlumnoUseCase.js";
 import { ActualizarNotasAlumnoUseCase } from "../../../application/use-cases/alumno/ActualizarNotasAlumnoUseCase.js";
 import { ObtenerResumenDashboardUseCase } from "../../../application/use-cases/dashboard/ObtenerResumenDashboardUseCase.js";
+import { RegistrarCuotasDelMesUseCase } from "../../../application/use-cases/cuota/RegistrarCuotasDelMesUseCase.js";
+import { ListarCuotasDelMesUseCase } from "../../../application/use-cases/cuota/ListarCuotasDelMesUseCase.js";
+import { ConfirmarPagoUseCase } from "../../../application/use-cases/cuota/ConfirmarPagoUseCase.js";
 import {
   AlumnoRepositoryFake,
   CuotaRepositoryFake,
@@ -63,6 +67,13 @@ async function construirApp(): Promise<{ app: FastifyInstance; tokens: TokenServ
     actualizarNotasAlumnoUseCase: new ActualizarNotasAlumnoUseCase(alumnos),
     obtenerUsuarioActualUseCase: new ObtenerUsuarioActualUseCase(usuarios),
     obtenerResumenDashboardUseCase: new ObtenerResumenDashboardUseCase(alumnos, cuotas, clases, clock),
+    listarCuotasDelMesUseCase: new ListarCuotasDelMesUseCase(
+      cuotas,
+      alumnos,
+      new RegistrarCuotasDelMesUseCase(alumnos, cuotas, clock),
+      clock
+    ),
+    confirmarPagoUseCase: new ConfirmarPagoUseCase(cuotas, clock),
   };
 
   const app = Fastify();
@@ -72,6 +83,7 @@ async function construirApp(): Promise<{ app: FastifyInstance; tokens: TokenServ
   registrarRutasAlumnos(app, container);
   registrarRutasUsuario(app, container);
   registrarRutasDashboard(app, container);
+  registrarRutasCuotas(app, container);
   await app.ready();
 
   return { app, tokens };
@@ -276,5 +288,66 @@ describe("GET /dashboard/resumen", () => {
       cuotasAtrasadas: [],
       horarioHoy: [],
     });
+  });
+});
+
+describe("Rutas de cuotas", () => {
+  it("GET /cuotas exige autenticación", async () => {
+    const { app } = await construirApp();
+    const respuesta = await app.inject({ method: "GET", url: "/cuotas" });
+    expect(respuesta.statusCode).toBe(401);
+  });
+
+  it("autogenera la cuota del mes del alumno activo y permite confirmarla", async () => {
+    const { app, tokens } = await construirApp();
+    const { accessToken } = await tokens.emitir("usuario-1");
+    const cabeceras = { authorization: `Bearer ${accessToken}` };
+
+    await app.inject({
+      method: "POST",
+      url: "/alumnos",
+      headers: cabeceras,
+      payload: {
+        nombre: "Marta",
+        apellidos: "Puig",
+        telefono: "600111222",
+        email: null,
+        dniNie: "11111111A",
+        fechaNacimiento: "1998-05-01",
+        cuotaMensual: 50,
+        disciplinas: ["boxeo"],
+      },
+    });
+
+    const listado = await app.inject({ method: "GET", url: "/cuotas", headers: cabeceras });
+    expect(listado.statusCode).toBe(200);
+    const cuotas = listado.json();
+    expect(cuotas).toHaveLength(1);
+    expect(cuotas[0]).toMatchObject({ nombreAlumno: "Marta Puig", importe: 50, estado: "pendiente" });
+
+    const confirmacion = await app.inject({
+      method: "POST",
+      url: `/cuotas/${cuotas[0].cuotaId}/confirmar`,
+      headers: cabeceras,
+      payload: { metodo: "bizum" },
+    });
+    expect(confirmacion.statusCode).toBe(204);
+
+    const listadoTrasConfirmar = await app.inject({ method: "GET", url: "/cuotas", headers: cabeceras });
+    expect(listadoTrasConfirmar.json()[0]).toMatchObject({ estado: "pagado", metodo: "bizum" });
+  });
+
+  it("devuelve 404 al confirmar una cuota inexistente", async () => {
+    const { app, tokens } = await construirApp();
+    const { accessToken } = await tokens.emitir("usuario-1");
+
+    const respuesta = await app.inject({
+      method: "POST",
+      url: "/cuotas/00000000-0000-4000-8000-000000000099/confirmar",
+      headers: { authorization: `Bearer ${accessToken}` },
+      payload: { metodo: "efectivo" },
+    });
+
+    expect(respuesta.statusCode).toBe(404);
   });
 });

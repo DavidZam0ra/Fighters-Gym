@@ -19,6 +19,9 @@ import { DarDeBajaAlumnoUseCase } from "../application/use-cases/alumno/DarDeBaj
 import { ActualizarNotasAlumnoUseCase } from "../application/use-cases/alumno/ActualizarNotasAlumnoUseCase.js";
 import { ObtenerUsuarioActualUseCase } from "../application/use-cases/auth/ObtenerUsuarioActualUseCase.js";
 import { ObtenerResumenDashboardUseCase } from "../application/use-cases/dashboard/ObtenerResumenDashboardUseCase.js";
+import { RegistrarCuotasDelMesUseCase } from "../application/use-cases/cuota/RegistrarCuotasDelMesUseCase.js";
+import { ListarCuotasDelMesUseCase } from "../application/use-cases/cuota/ListarCuotasDelMesUseCase.js";
+import { ConfirmarPagoUseCase } from "../application/use-cases/cuota/ConfirmarPagoUseCase.js";
 
 export interface EnvConfig {
   jwtAccessSecret: string;
@@ -43,6 +46,8 @@ export interface Container {
   actualizarNotasAlumnoUseCase: ActualizarNotasAlumnoUseCase;
   obtenerUsuarioActualUseCase: ObtenerUsuarioActualUseCase;
   obtenerResumenDashboardUseCase: ObtenerResumenDashboardUseCase;
+  listarCuotasDelMesUseCase: ListarCuotasDelMesUseCase;
+  confirmarPagoUseCase: ConfirmarPagoUseCase;
 }
 
 export function crearContainer(env: EnvConfig): Container {
@@ -80,5 +85,12 @@ export function crearContainer(env: EnvConfig): Container {
       claseRepository,
       clock
     ),
+    listarCuotasDelMesUseCase: new ListarCuotasDelMesUseCase(
+      cuotaRepository,
+      alumnoRepository,
+      new RegistrarCuotasDelMesUseCase(alumnoRepository, cuotaRepository, clock),
+      clock
+    ),
+    confirmarPagoUseCase: new ConfirmarPagoUseCase(cuotaRepository, clock),
   };
 }

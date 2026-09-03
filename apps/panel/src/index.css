@@ -784,6 +784,78 @@ button:disabled {
   background: var(--accent);
 }
 
+/* ---------- Cuotas ---------- */
+
+.etiqueta-estado--pagado {
+  color: var(--color-exito);
+}
+
+.tarjetas-kpi--cuotas {
+  grid-template-columns: 1fr;
+}
+
+.filtro-pills {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.filtro-pill {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  padding: 7px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 999px;
+}
+
+.filtro-pill--activo {
+  background: #3a383c;
+  color: var(--text);
+  border-color: #3a383c;
+}
+
+.fila-cuota {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.fila-cuota:last-child {
+  border-bottom: none;
+}
+
+.fila-cuota-nombre {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.fila-cuota-accion {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.selector-metodo {
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  color: var(--text);
+  border-radius: 8px;
+  padding: 7px 8px;
+  font-size: 12px;
+}
+
+.boton-primario--compacto {
+  display: inline-block;
+  width: auto;
+  padding: 8px 14px;
+  font-size: 12px;
+}
+
 @media (min-width: 768px) {
   .ficha-layout {
     flex-direction: row;
@@ -798,5 +870,21 @@ button:disabled {
   .ficha-columna-derecha {
     flex: 1;
     min-width: 0;
+  }
+
+  .tarjetas-kpi--cuotas {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .fila-cuota {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1.2fr 1fr auto;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .fila-cuota-accion {
+    margin-top: 0;
+    justify-self: end;
   }
 }

@@ -15,7 +15,7 @@ const ENLACES_NAV: EnlaceNav[] = [
   { to: "/home", etiqueta: "Dashboard", icono: "dashboard" },
   { to: "/alumnos", etiqueta: "Alumnos", icono: "alumnos" },
   { to: "/calendario", etiqueta: "Calendario", icono: "calendario", proximamente: true },
-  { to: "/cuotas", etiqueta: "Cuotas", icono: "cuotas", proximamente: true },
+  { to: "/cuotas", etiqueta: "Cuotas", icono: "cuotas" },
 ];
 
 export function PanelLayout({ children, titulo }: { children: ReactNode; titulo: string }) {

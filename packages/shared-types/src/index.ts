@@ -75,6 +75,20 @@ export interface FichaAlumnoDTO {
   asistenciaDelMes: AsistenciaDTO[];
 }
 
+export interface CuotaDelMesDTO {
+  cuotaId: string;
+  alumnoId: string;
+  nombreAlumno: string;
+  importe: number;
+  metodo: MetodoPago | null;
+  fechaPago: string | null;
+  estado: EstadoCuota;
+}
+
+export interface ConfirmarPagoRequestDTO {
+  metodo: MetodoPago;
+}
+
 export interface LoginRequestDTO {
   email: string;
   password: string;
