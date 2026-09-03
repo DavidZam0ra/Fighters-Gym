@@ -12,6 +12,12 @@
       "runtimeExecutable": "npx",
       "runtimeArgs": ["--yes", "pnpm@9.15.0", "dev:api"],
       "port": 4000
+    },
+    {
+      "name": "landing",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["--yes", "pnpm@9.15.0", "--filter", "@fighters-gym/landing", "dev"],
+      "port": 3001
     }
   ]
 }
