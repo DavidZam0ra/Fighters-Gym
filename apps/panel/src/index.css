@@ -998,3 +998,135 @@ button:disabled {
     display: block;
   }
 }
+
+/* ---------- Alumnos: acciones + Nuevo alumno ---------- */
+
+.alumnos-cabecera-acciones {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.boton-nuevo-alumno {
+  text-align: center;
+  text-decoration: none;
+}
+
+.alumno-avatar {
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: var(--bg-input);
+}
+
+.escaneo-foto {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.escaneo-foto--proximamente {
+  opacity: 0.55;
+}
+
+.escaneo-foto-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.boton-primario--deshabilitado {
+  cursor: not-allowed;
+  text-decoration: none;
+}
+
+.formulario-alumno {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.formulario-cabecera {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.formulario-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+}
+
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.campo label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.campo input {
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 14px;
+  color: var(--text);
+  outline: none;
+}
+
+.campo input:focus {
+  border-color: var(--accent);
+}
+
+.campo-obligatorio {
+  color: var(--accent);
+}
+
+.campo-nota {
+  margin-top: -8px;
+  font-size: 12px;
+}
+
+.disciplinas-selector {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.formulario-submit {
+  align-self: stretch;
+}
+
+@media (min-width: 768px) {
+  .alumnos-cabecera-acciones {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .alumnos-cabecera-acciones .campo-busqueda {
+    max-width: 320px;
+  }
+
+  .escaneo-foto {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .formulario-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .formulario-submit {
+    align-self: flex-start;
+    padding-left: 32px;
+    padding-right: 32px;
+  }
+}

@@ -4,6 +4,8 @@ import type { FichaAlumnoDTO } from "@fighters-gym/shared-types";
 import { useAuth } from "../lib/AuthContext.js";
 import { peticionApi } from "../lib/apiClient.js";
 import { PanelLayout } from "../components/PanelLayout.js";
+import { AlumnoAvatar } from "../components/AlumnoAvatar.js";
+import { etiquetaDisciplina } from "../lib/disciplinas.js";
 
 const NOMBRES_MES = [
   "enero",
@@ -126,10 +128,7 @@ export function FichaAlumnoPage() {
       <div className="ficha-layout">
         <div className="ficha-columna-izquierda">
           <div className="tarjeta-panel ficha-header">
-            <div className="ficha-avatar-grande">
-              {alumno.nombre.charAt(0).toUpperCase()}
-              {alumno.apellidos.charAt(0).toUpperCase()}
-            </div>
+            <AlumnoAvatar seed={alumno.avatarSeed} size={64} />
             <div className="display ficha-nombre">
               {alumno.nombre} {alumno.apellidos}
             </div>
@@ -159,7 +158,7 @@ export function FichaAlumnoPage() {
             </div>
             <div className="ficha-datos-fila">
               <span>Disciplinas</span>
-              <span>{alumno.disciplinas.join(", ")}</span>
+              <span>{alumno.disciplinas.map(etiquetaDisciplina).join(", ")}</span>
             </div>
           </div>
 

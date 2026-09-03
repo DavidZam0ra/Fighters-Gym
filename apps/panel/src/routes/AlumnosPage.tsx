@@ -4,6 +4,8 @@ import type { AlumnoDTO } from "@fighters-gym/shared-types";
 import { useAuth } from "../lib/AuthContext.js";
 import { peticionApi } from "../lib/apiClient.js";
 import { PanelLayout } from "../components/PanelLayout.js";
+import { AlumnoAvatar } from "../components/AlumnoAvatar.js";
+import { etiquetaDisciplina } from "../lib/disciplinas.js";
 
 export function AlumnosPage() {
   const { accessToken } = useAuth();
@@ -37,13 +39,18 @@ export function AlumnosPage() {
     <PanelLayout titulo="Alumnos">
       {error !== null && <p className="mensaje-error">{error}</p>}
 
-      <input
-        type="search"
-        className="campo-busqueda"
-        placeholder="Buscar por nombre…"
-        value={busqueda}
-        onChange={(evento) => setBusqueda(evento.target.value)}
-      />
+      <div className="alumnos-cabecera-acciones">
+        <input
+          type="search"
+          className="campo-busqueda"
+          placeholder="Buscar por nombre…"
+          value={busqueda}
+          onChange={(evento) => setBusqueda(evento.target.value)}
+        />
+        <Link to="/alumnos/nuevo" className="boton-primario boton-primario--compacto boton-nuevo-alumno">
+          + Nuevo alumno
+        </Link>
+      </div>
 
       {alumnos !== null && (
         <div className="lista-tarjeta lista-tarjeta--alumnos">
@@ -52,15 +59,14 @@ export function AlumnosPage() {
           ) : (
             alumnosFiltrados.map((alumno) => (
               <Link className="fila-alumno" to={`/alumnos/${alumno.id}`} key={alumno.id}>
-                <div className="fila-alumno-avatar">
-                  {alumno.nombre.charAt(0).toUpperCase()}
-                  {alumno.apellidos.charAt(0).toUpperCase()}
-                </div>
+                <AlumnoAvatar seed={alumno.avatarSeed} size={36} />
                 <div className="fila-alumno-info">
                   <span className="fila-alumno-nombre">
                     {alumno.nombre} {alumno.apellidos}
                   </span>
-                  <span className="texto-muted">{alumno.disciplinas.join(", ")}</span>
+                  <span className="texto-muted">
+                    {alumno.disciplinas.map(etiquetaDisciplina).join(", ")}
+                  </span>
                 </div>
               </Link>
             ))

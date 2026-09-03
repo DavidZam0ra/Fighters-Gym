@@ -5,6 +5,7 @@ import { LoginPage } from "./routes/LoginPage.js";
 import { DashboardPage } from "./routes/DashboardPage.js";
 import { AlumnosPage } from "./routes/AlumnosPage.js";
 import { FichaAlumnoPage } from "./routes/FichaAlumnoPage.js";
+import { NuevoAlumnoPage } from "./routes/NuevoAlumnoPage.js";
 import { CuotasPage } from "./routes/CuotasPage.js";
 import { CalendarioPage } from "./routes/CalendarioPage.js";
 
@@ -18,6 +19,7 @@ export function App() {
           <Route element={<ProtectedRoute />}>
             <Route path="/home" element={<DashboardPage />} />
             <Route path="/alumnos" element={<AlumnosPage />} />
+            <Route path="/alumnos/nuevo" element={<NuevoAlumnoPage />} />
             <Route path="/alumnos/:id" element={<FichaAlumnoPage />} />
             <Route path="/cuotas" element={<CuotasPage />} />
             <Route path="/calendario" element={<CalendarioPage />} />
