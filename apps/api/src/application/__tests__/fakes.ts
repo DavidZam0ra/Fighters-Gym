@@ -59,15 +59,6 @@ export class CuotaRepositoryFake implements CuotaRepository {
     return [...this.porId.values()].filter((c) => c.alumnoId === alumnoId).slice(0, limite);
   }
 
-  async listarPagadasEntre(desde: Date, hasta: Date): Promise<Cuota[]> {
-    return [...this.porId.values()].filter(
-      (c) => c.fechaPago !== null && c.fechaPago >= desde && c.fechaPago < hasta
-    );
-  }
-
-  async listarNoPagadas(): Promise<Cuota[]> {
-    return [...this.porId.values()].filter((c) => c.fechaPago === null);
-  }
 }
 
 export class ClaseRepositoryFake implements ClaseRepository {

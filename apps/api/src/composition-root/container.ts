@@ -65,6 +65,7 @@ export function crearContainer(env: EnvConfig): Container {
     refreshSecret: env.jwtRefreshSecret,
   });
   const clock = new SystemClock();
+  const registrarCuotasDelMes = new RegistrarCuotasDelMesUseCase(alumnoRepository, cuotaRepository, clock);
 
   return {
     clock,
@@ -85,12 +86,13 @@ export function crearContainer(env: EnvConfig): Container {
       alumnoRepository,
       cuotaRepository,
       claseRepository,
+      registrarCuotasDelMes,
       clock
     ),
     listarCuotasDelMesUseCase: new ListarCuotasDelMesUseCase(
       cuotaRepository,
       alumnoRepository,
-      new RegistrarCuotasDelMesUseCase(alumnoRepository, cuotaRepository, clock),
+      registrarCuotasDelMes,
       clock
     ),
     confirmarPagoUseCase: new ConfirmarPagoUseCase(cuotaRepository, clock),

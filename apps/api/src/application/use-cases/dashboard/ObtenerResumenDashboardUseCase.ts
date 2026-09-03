@@ -2,7 +2,9 @@ import type { AlumnoRepository } from "../../ports/out/AlumnoRepository.js";
 import type { CuotaRepository } from "../../ports/out/CuotaRepository.js";
 import type { ClaseRepository } from "../../ports/out/ClaseRepository.js";
 import type { Clock } from "../../ports/out/Clock.js";
+import { Periodo } from "../../../domain/cuota/Periodo.js";
 import { diaSemanaDesdeFecha } from "../../../domain/clase/DiaSemana.js";
+import type { RegistrarCuotasDelMesUseCase } from "../cuota/RegistrarCuotasDelMesUseCase.js";
 
 const LIMITE_CUOTAS_ATRASADAS = 5;
 
@@ -27,32 +29,40 @@ export interface ResumenDashboard {
   horarioHoy: ClaseDeHoy[];
 }
 
+/**
+ * Deliberadamente mira solo el periodo actual, igual que la pantalla de
+ * Cuotas (misma consulta, mismo RegistrarCuotasDelMesUseCase por delante) —
+ * antes el Dashboard sumaba TODOS los periodos sin pagar mientras Cuotas
+ * solo mostraba el mes en curso, y los dos números no coincidían nunca.
+ */
 export class ObtenerResumenDashboardUseCase {
   constructor(
     private readonly alumnos: AlumnoRepository,
     private readonly cuotas: CuotaRepository,
     private readonly clases: ClaseRepository,
+    private readonly registrarCuotasDelMes: RegistrarCuotasDelMesUseCase,
     private readonly clock: Clock
   ) {}
 
   async ejecutar(): Promise<ResumenDashboard> {
-    const hoy = this.clock.now();
-    const inicioMes = new Date(Date.UTC(hoy.getUTCFullYear(), hoy.getUTCMonth(), 1));
-    const inicioMesSiguiente = new Date(Date.UTC(hoy.getUTCFullYear(), hoy.getUTCMonth() + 1, 1));
+    await this.registrarCuotasDelMes.ejecutar();
 
-    const [alumnosActivos, cuotasSinPagar, cuotasPagadasEsteMes, todasLasClases] = await Promise.all([
+    const hoy = this.clock.now();
+    const periodoActual = Periodo.desdeFecha(hoy);
+
+    const [alumnosActivos, cuotasDelMes, todasLasClases] = await Promise.all([
       this.alumnos.listarActivos(),
-      // Cualquier periodo, no solo el actual: una cuota "atrasada" suele ser
-      // justo la de un mes anterior que sigue sin pagarse.
-      this.cuotas.listarNoPagadas(),
-      this.cuotas.listarPagadasEntre(inicioMes, inicioMesSiguiente),
+      this.cuotas.listarPorPeriodo(periodoActual),
       this.clases.listarTodas(),
     ]);
 
-    // estadoActual() de una cuota sin fechaPago nunca es "pagado" — solo puede
-    // ser "pendiente" o "atrasado".
-    const cuotasImpagadas = cuotasSinPagar
-      .map((cuota) => ({ cuota, estado: cuota.estadoActual(hoy) as "pendiente" | "atrasado" }))
+    const cuotasConEstado = cuotasDelMes.map((cuota) => ({ cuota, estado: cuota.estadoActual(hoy) }));
+
+    const cuotasImpagadas = cuotasConEstado
+      .filter(
+        (item): item is { cuota: (typeof cuotasConEstado)[number]["cuota"]; estado: "pendiente" | "atrasado" } =>
+          item.estado !== "pagado"
+      )
       .sort((a, b) => Number(b.estado === "atrasado") - Number(a.estado === "atrasado"));
 
     const cuotasAtrasadas = await Promise.all(
@@ -65,6 +75,10 @@ export class ObtenerResumenDashboardUseCase {
         };
       })
     );
+
+    const cobradoEsteMes = cuotasConEstado
+      .filter((item) => item.estado === "pagado")
+      .reduce((suma, item) => suma + item.cuota.importe, 0);
 
     const diaHoy = diaSemanaDesdeFecha(hoy);
     const horarioHoy =
@@ -79,7 +93,7 @@ export class ObtenerResumenDashboardUseCase {
       alumnosActivos: alumnosActivos.length,
       cuotasPendientes: cuotasImpagadas.length,
       clasesHoy: horarioHoy.length,
-      cobradoEsteMes: cuotasPagadasEsteMes.reduce((suma, cuota) => suma + cuota.importe, 0),
+      cobradoEsteMes,
       cuotasAtrasadas,
       horarioHoy,
     };

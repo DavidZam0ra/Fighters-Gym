@@ -51,18 +51,6 @@ export class PrismaCuotaRepository implements CuotaRepository {
     return filas.map((fila) => this.aDominio(fila));
   }
 
-  async listarPagadasEntre(desde: Date, hasta: Date): Promise<Cuota[]> {
-    const filas = await this.prisma.cuota.findMany({
-      where: { fechaPago: { gte: desde, lt: hasta } },
-    });
-    return filas.map((fila) => this.aDominio(fila));
-  }
-
-  async listarNoPagadas(): Promise<Cuota[]> {
-    const filas = await this.prisma.cuota.findMany({ where: { fechaPago: null } });
-    return filas.map((fila) => this.aDominio(fila));
-  }
-
   private aDominio(fila: CuotaRow): Cuota {
     return new Cuota({
       id: fila.id,

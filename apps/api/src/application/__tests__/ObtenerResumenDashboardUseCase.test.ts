@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { ObtenerResumenDashboardUseCase } from "../use-cases/dashboard/ObtenerResumenDashboardUseCase.js";
+import { RegistrarCuotasDelMesUseCase } from "../use-cases/cuota/RegistrarCuotasDelMesUseCase.js";
 import { CrearAlumnoUseCase } from "../use-cases/alumno/CrearAlumnoUseCase.js";
 import { Cuota } from "../../domain/cuota/Cuota.js";
 import { Periodo } from "../../domain/cuota/Periodo.js";
@@ -12,25 +13,16 @@ import {
 } from "./fakes.js";
 
 describe("ObtenerResumenDashboardUseCase", () => {
-  it("resume alumnos activos, cuotas impagadas, clases de hoy y cobrado del mes", async () => {
+  it("resume alumnos activos, cuotas impagadas del periodo actual, clases de hoy y cobrado del mes", async () => {
     const alumnos = new AlumnoRepositoryFake();
     const cuotas = new CuotaRepositoryFake();
     const clases = new ClaseRepositoryFake();
     // Lunes 2026-09-07: elegido a propósito para que caiga en "lunes".
     const clock = new ClockFake(new Date("2026-09-07T10:00:00Z"));
     const periodoActual = Periodo.desdeFecha(clock.now());
+    const registrarCuotasDelMes = new RegistrarCuotasDelMesUseCase(alumnos, cuotas, clock);
 
     const crearAlumno = new CrearAlumnoUseCase(alumnos, clock);
-    const alumnoAtrasado = await crearAlumno.ejecutar({
-      nombre: "Núria",
-      apellidos: "Alberola",
-      telefono: "600000001",
-      email: null,
-      dniNie: "10000001A",
-      fechaNacimiento: new Date("1990-01-01T00:00:00Z"),
-      cuotaMensual: 45,
-      disciplinas: ["boxeo"],
-    });
     const alumnoPendiente = await crearAlumno.ejecutar({
       nombre: "Iván",
       apellidos: "Soler",
@@ -51,12 +43,25 @@ describe("ObtenerResumenDashboardUseCase", () => {
       cuotaMensual: 45,
       disciplinas: ["kickboxing"],
     });
+    const alumnoConDeudaAntigua = await crearAlumno.ejecutar({
+      nombre: "Núria",
+      apellidos: "Alberola",
+      telefono: "600000001",
+      email: null,
+      dniNie: "10000001A",
+      fechaNacimiento: new Date("1990-01-01T00:00:00Z"),
+      cuotaMensual: 45,
+      disciplinas: ["boxeo"],
+    });
 
-    // Atrasada: periodo de agosto, sin pagar, y ya pasado el margen de 5 días de septiembre.
+    // Impagada de un periodo pasado (agosto): no debe contarse como impagada
+    // del periodo actual (el resumen solo mira septiembre, igual que Cuotas).
+    // Como este alumno no tiene todavía cuota de septiembre, el propio
+    // RegistrarCuotasDelMesUseCase le generará una pendiente al ejecutar.
     await cuotas.guardar(
       new Cuota({
-        id: "cuota-atrasada",
-        alumnoId: alumnoAtrasado.id,
+        id: "cuota-agosto",
+        alumnoId: alumnoConDeudaAntigua.id,
         periodo: Periodo.de(2026, 8),
         importe: 45,
         metodo: null,
@@ -114,24 +119,27 @@ describe("ObtenerResumenDashboardUseCase", () => {
       })
     );
 
-    const useCase = new ObtenerResumenDashboardUseCase(alumnos, cuotas, clases, clock);
+    const useCase = new ObtenerResumenDashboardUseCase(alumnos, cuotas, clases, registrarCuotasDelMes, clock);
     const resumen = await useCase.ejecutar();
 
     expect(resumen.alumnosActivos).toBe(3);
-    expect(resumen.cuotasPendientes).toBe(2);
-    expect(resumen.cobradoEsteMes).toBe(45);
     expect(resumen.clasesHoy).toBe(1);
     expect(resumen.horarioHoy).toEqual([{ id: "clase-1", nombre: "Kickboxing", horaInicio: "18:15" }]);
 
+    // Dos impagadas del periodo actual: la pendiente ya existente de Iván y
+    // la nueva pendiente de septiembre autogenerada para Núria. La deuda de
+    // agosto de Núria no se cuenta aquí (ese es justo el bug que se arregló).
+    expect(resumen.cuotasPendientes).toBe(2);
+    expect(resumen.cobradoEsteMes).toBe(45);
     expect(resumen.cuotasAtrasadas).toHaveLength(2);
     expect(resumen.cuotasAtrasadas[0]).toEqual({
-      alumnoId: alumnoAtrasado.id,
-      nombreAlumno: "Núria Alberola",
-      estado: "atrasado",
-    });
-    expect(resumen.cuotasAtrasadas[1]).toEqual({
       alumnoId: alumnoPendiente.id,
       nombreAlumno: "Iván Soler",
+      estado: "pendiente",
+    });
+    expect(resumen.cuotasAtrasadas[1]).toEqual({
+      alumnoId: alumnoConDeudaAntigua.id,
+      nombreAlumno: "Núria Alberola",
       estado: "pendiente",
     });
   });

@@ -61,6 +61,7 @@ async function construirApp(): Promise<{
     rol: "admin",
   });
   const usuarios = new UsuarioRepositoryFake([usuario]);
+  const registrarCuotasDelMes = new RegistrarCuotasDelMesUseCase(alumnos, cuotas, clock);
 
   const container: Container = {
     clock,
@@ -73,13 +74,14 @@ async function construirApp(): Promise<{
     darDeBajaAlumnoUseCase: new DarDeBajaAlumnoUseCase(alumnos),
     actualizarNotasAlumnoUseCase: new ActualizarNotasAlumnoUseCase(alumnos),
     obtenerUsuarioActualUseCase: new ObtenerUsuarioActualUseCase(usuarios),
-    obtenerResumenDashboardUseCase: new ObtenerResumenDashboardUseCase(alumnos, cuotas, clases, clock),
-    listarCuotasDelMesUseCase: new ListarCuotasDelMesUseCase(
-      cuotas,
+    obtenerResumenDashboardUseCase: new ObtenerResumenDashboardUseCase(
       alumnos,
-      new RegistrarCuotasDelMesUseCase(alumnos, cuotas, clock),
+      cuotas,
+      clases,
+      registrarCuotasDelMes,
       clock
     ),
+    listarCuotasDelMesUseCase: new ListarCuotasDelMesUseCase(cuotas, alumnos, registrarCuotasDelMes, clock),
     confirmarPagoUseCase: new ConfirmarPagoUseCase(cuotas, clock),
     listarClasesUseCase: new ListarClasesUseCase(clases),
   };
