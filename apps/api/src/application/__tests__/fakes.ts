@@ -29,6 +29,11 @@ export class AlumnoRepositoryFake implements AlumnoRepository {
     return this.porId.get(id) ?? null;
   }
 
+  async buscarPorIds(ids: string[]): Promise<Alumno[]> {
+    const idsUnicos = new Set(ids);
+    return [...this.porId.values()].filter((a) => idsUnicos.has(a.id));
+  }
+
   async listarActivos(): Promise<Alumno[]> {
     return [...this.porId.values()].filter((a) => a.estado === "activo");
   }

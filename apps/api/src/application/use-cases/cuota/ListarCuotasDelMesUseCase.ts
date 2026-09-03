@@ -31,20 +31,22 @@ export class ListarCuotasDelMesUseCase {
     const periodo = Periodo.desdeFecha(hoy);
     const cuotas = await this.cuotas.listarPorPeriodo(periodo);
 
-    const filas = await Promise.all(
-      cuotas.map(async (cuota) => {
-        const alumno = await this.alumnos.buscarPorId(cuota.alumnoId);
-        return {
-          cuotaId: cuota.id,
-          alumnoId: cuota.alumnoId,
-          nombreAlumno: alumno?.nombreCompleto ?? "Alumno desconocido",
-          importe: cuota.importe,
-          metodo: cuota.metodo,
-          fechaPago: cuota.fechaPago,
-          estado: cuota.estadoActual(hoy),
-        };
-      })
-    );
+    const alumnoIds = [...new Set(cuotas.map((cuota) => cuota.alumnoId))];
+    const alumnos = await this.alumnos.buscarPorIds(alumnoIds);
+    const alumnoPorId = new Map(alumnos.map((alumno) => [alumno.id, alumno]));
+
+    const filas = cuotas.map((cuota) => {
+      const alumno = alumnoPorId.get(cuota.alumnoId);
+      return {
+        cuotaId: cuota.id,
+        alumnoId: cuota.alumnoId,
+        nombreAlumno: alumno?.nombreCompleto ?? "Alumno desconocido",
+        importe: cuota.importe,
+        metodo: cuota.metodo,
+        fechaPago: cuota.fechaPago,
+        estado: cuota.estadoActual(hoy),
+      };
+    });
 
     return filas.sort((a, b) => a.nombreAlumno.localeCompare(b.nombreAlumno, "es"));
   }

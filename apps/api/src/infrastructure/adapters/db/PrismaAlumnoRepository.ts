@@ -46,6 +46,17 @@ export class PrismaAlumnoRepository implements AlumnoRepository {
     return fila === null ? null : this.aDominio(fila);
   }
 
+  async buscarPorIds(ids: string[]): Promise<Alumno[]> {
+    if (ids.length === 0) {
+      return [];
+    }
+    const filas = await this.prisma.alumno.findMany({
+      where: { id: { in: ids } },
+      include: { disciplinas: true },
+    });
+    return filas.map((fila) => this.aDominio(fila));
+  }
+
   async listarActivos(): Promise<Alumno[]> {
     const filas = await this.prisma.alumno.findMany({
       where: { estado: "activo" },

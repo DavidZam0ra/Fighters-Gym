@@ -65,16 +65,15 @@ export class ObtenerResumenDashboardUseCase {
       )
       .sort((a, b) => Number(b.estado === "atrasado") - Number(a.estado === "atrasado"));
 
-    const cuotasAtrasadas = await Promise.all(
-      cuotasImpagadas.slice(0, LIMITE_CUOTAS_ATRASADAS).map(async ({ cuota, estado }) => {
-        const alumno = await this.alumnos.buscarPorId(cuota.alumnoId);
-        return {
-          alumnoId: cuota.alumnoId,
-          nombreAlumno: alumno?.nombreCompleto ?? "Alumno desconocido",
-          estado,
-        };
-      })
-    );
+    const topImpagadas = cuotasImpagadas.slice(0, LIMITE_CUOTAS_ATRASADAS);
+    const alumnosImpagados = await this.alumnos.buscarPorIds(topImpagadas.map(({ cuota }) => cuota.alumnoId));
+    const alumnoPorId = new Map(alumnosImpagados.map((alumno) => [alumno.id, alumno]));
+
+    const cuotasAtrasadas = topImpagadas.map(({ cuota, estado }) => ({
+      alumnoId: cuota.alumnoId,
+      nombreAlumno: alumnoPorId.get(cuota.alumnoId)?.nombreCompleto ?? "Alumno desconocido",
+      estado,
+    }));
 
     const cobradoEsteMes = cuotasConEstado
       .filter((item) => item.estado === "pagado")
