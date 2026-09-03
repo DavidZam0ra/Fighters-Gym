@@ -94,6 +94,11 @@ button:disabled {
   pointer-events: none;
 }
 
+.login-logo {
+  width: 220px;
+  height: auto;
+}
+
 .login-contenido {
   position: relative;
   width: 100%;
@@ -103,16 +108,10 @@ button:disabled {
   align-items: center;
 }
 
-.login-titulo {
-  font-size: 20px;
-  letter-spacing: 1px;
-  margin-top: 18px;
-}
-
 .login-subtitulo {
   font-size: 13px;
   color: var(--text-muted);
-  margin-top: 6px;
+  margin-top: 18px;
   margin-bottom: 32px;
 }
 
@@ -238,6 +237,11 @@ button:disabled {
   border-bottom: 1px solid var(--border);
   margin-bottom: 20px;
   font-size: 14px;
+}
+
+.panel-marca-logo {
+  width: 170px;
+  height: auto;
 }
 
 .panel-nav-titulo {

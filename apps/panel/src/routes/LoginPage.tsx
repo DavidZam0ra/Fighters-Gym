@@ -2,7 +2,6 @@ import { useState, type FormEvent } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
 import { useAuth } from "../lib/AuthContext.js";
 import { ApiError } from "../lib/apiClient.js";
-import { HelmetLogoBadge } from "../components/HelmetLogo.js";
 
 export function LoginPage() {
   const { accessToken, cargandoSesion, login } = useAuth();
@@ -34,8 +33,7 @@ export function LoginPage() {
     <div className="pantalla-login">
       <div className="login-glow" aria-hidden="true" />
       <div className="login-contenido">
-        <HelmetLogoBadge />
-        <span className="display login-titulo">Fighters Gym</span>
+        <img src="/logo.png" alt="Fighters Gym" className="login-logo" />
         <span className="login-subtitulo">Panel de gestión</span>
 
         <form className="login-tarjeta" onSubmit={(evento) => void manejarSubmit(evento)}>

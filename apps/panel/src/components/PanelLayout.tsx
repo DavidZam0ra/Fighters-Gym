@@ -1,7 +1,6 @@
 import type { ReactNode } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "../lib/AuthContext.js";
-import { HelmetLogoBadge } from "./HelmetLogo.js";
 import { NavIcon, type NombreIcono } from "./NavIcon.js";
 
 interface EnlaceNav {
@@ -32,8 +31,7 @@ export function PanelLayout({ children, titulo }: { children: ReactNode; titulo:
     <div className="panel-shell">
       <aside className="panel-sidebar">
         <div className="panel-marca">
-          <HelmetLogoBadge size={30} />
-          <span className="display">Fighters Gym</span>
+          <img src="/logo.png" alt="Fighters Gym" className="panel-marca-logo" />
         </div>
 
         <div className="panel-nav-titulo">Gestión</div>

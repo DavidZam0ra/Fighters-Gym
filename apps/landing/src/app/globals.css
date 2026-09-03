@@ -116,6 +116,11 @@ a {
   gap: 12px;
 }
 
+.cabecera-logo {
+  height: 40px;
+  width: auto;
+}
+
 .cabecera-nav {
   display: none;
 }
@@ -462,6 +467,11 @@ a {
   border-top: 1px solid var(--border);
   font-size: 13px;
   color: var(--text-faint);
+}
+
+.pie-logo {
+  height: 28px;
+  width: auto;
 }
 
 .pie a {
