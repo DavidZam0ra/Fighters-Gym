@@ -1,14 +1,8 @@
-import { useEffect, useState, type ReactNode } from "react";
+import type { ReactNode } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "../lib/AuthContext.js";
-import { peticionApi } from "../lib/apiClient.js";
 import { HelmetLogoBadge } from "./HelmetLogo.js";
 import { NavIcon, type NombreIcono } from "./NavIcon.js";
-
-interface UsuarioActual {
-  nombre: string;
-  rol: "admin" | "profesor";
-}
 
 interface EnlaceNav {
   to: string;
@@ -25,18 +19,8 @@ const ENLACES_NAV: EnlaceNav[] = [
 ];
 
 export function PanelLayout({ children, titulo }: { children: ReactNode; titulo: string }) {
-  const { accessToken, logout } = useAuth();
+  const { usuario, logout } = useAuth();
   const location = useLocation();
-  const [usuario, setUsuario] = useState<UsuarioActual | null>(null);
-
-  useEffect(() => {
-    if (accessToken === null) {
-      return;
-    }
-    peticionApi<UsuarioActual>("/auth/me", { accessToken })
-      .then(setUsuario)
-      .catch(() => setUsuario(null));
-  }, [accessToken]);
 
   const fecha = new Intl.DateTimeFormat("es-ES", {
     weekday: "long",

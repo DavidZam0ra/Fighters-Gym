@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import type { UsuarioActualDTO } from "@fighters-gym/shared-types";
 import { peticionApi } from "./apiClient.js";
 
 interface LoginResponse {
@@ -7,6 +8,7 @@ interface LoginResponse {
 
 interface AuthContextValue {
   accessToken: string | null;
+  usuario: UsuarioActualDTO | null;
   cargandoSesion: boolean;
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
@@ -16,6 +18,7 @@ const AuthContext = createContext<AuthContextValue | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [accessToken, setAccessToken] = useState<string | null>(null);
+  const [usuario, setUsuario] = useState<UsuarioActualDTO | null>(null);
   const [cargandoSesion, setCargandoSesion] = useState(true);
 
   useEffect(() => {
@@ -26,6 +29,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .catch(() => setAccessToken(null))
       .finally(() => setCargandoSesion(false));
   }, []);
+
+  useEffect(() => {
+    // Se pide una única vez por sesión (cuando cambia el token, es decir,
+    // login/logout/refresh) — no en cada pantalla que se monta. El nombre y
+    // el rol no cambian salvo que se cierre sesión.
+    if (accessToken === null) {
+      setUsuario(null);
+      return;
+    }
+    peticionApi<UsuarioActualDTO>("/auth/me", { accessToken })
+      .then(setUsuario)
+      .catch(() => setUsuario(null));
+  }, [accessToken]);
 
   async function login(email: string, password: string): Promise<void> {
     const respuesta = await peticionApi<LoginResponse>("/auth/login", {
@@ -40,8 +56,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   const value = useMemo(
-    () => ({ accessToken, cargandoSesion, login, logout }),
-    [accessToken, cargandoSesion]
+    () => ({ accessToken, usuario, cargandoSesion, login, logout }),
+    [accessToken, usuario, cargandoSesion]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
