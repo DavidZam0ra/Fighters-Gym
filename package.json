@@ -6,6 +6,7 @@
     "node": ">=20"
   },
   "scripts": {
+    "dev": "pnpm -r --parallel --filter=@fighters-gym/api --filter=@fighters-gym/panel --filter=@fighters-gym/landing run dev",
     "dev:api": "pnpm --filter @fighters-gym/api dev",
     "dev:panel": "pnpm --filter @fighters-gym/panel dev",
     "dev:landing": "pnpm --filter @fighters-gym/landing dev",
