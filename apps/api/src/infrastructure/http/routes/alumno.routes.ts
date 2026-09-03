@@ -1,9 +1,10 @@
 import type { FastifyInstance } from "fastify";
-import type { AlumnoDTO } from "@fighters-gym/shared-types";
+import type { AlumnoDTO, DatosAlumnoExtraidosDTO } from "@fighters-gym/shared-types";
 import { crearAlumnoSchema, actualizarNotasSchema } from "../schemas/alumno.schemas.js";
 import { idParamSchema } from "../schemas/common.schemas.js";
-import { aAlumnoDTO, aFichaAlumnoDTO } from "../mappers/alumno.mapper.js";
+import { aAlumnoDTO, aFichaAlumnoDTO, aDatosAlumnoExtraidosDTO } from "../mappers/alumno.mapper.js";
 import { AlumnoNoEncontradoError } from "../../../application/use-cases/alumno/DarDeBajaAlumnoUseCase.js";
+import { VisionExtractionError } from "../../../application/ports/out/VisionExtractionService.js";
 import type { Container } from "../../../composition-root/container.js";
 
 export function registrarRutasAlumnos(app: FastifyInstance, container: Container): void {
@@ -43,6 +44,25 @@ export function registrarRutasAlumnos(app: FastifyInstance, container: Container
     } catch (error) {
       if (error instanceof AlumnoNoEncontradoError) {
         return reply.code(404).send({ error: error.message });
+      }
+      throw error;
+    }
+  });
+
+  app.post("/alumnos/importar-foto", { preHandler: container.authenticate }, async (request, reply) => {
+    const archivo = await request.file();
+    if (archivo === undefined) {
+      return reply.code(400).send({ error: "No se ha subido ninguna imagen." });
+    }
+    const imagen = await archivo.toBuffer();
+
+    try {
+      const datos = await container.importarAlumnoPorFotoUseCase.ejecutar(imagen);
+      const respuesta: DatosAlumnoExtraidosDTO = aDatosAlumnoExtraidosDTO(datos);
+      return respuesta;
+    } catch (error) {
+      if (error instanceof VisionExtractionError) {
+        return reply.code(502).send({ error: "No se ha podido leer la foto. Prueba otra vez con más luz." });
       }
       throw error;
     }

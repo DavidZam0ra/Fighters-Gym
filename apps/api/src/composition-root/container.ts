@@ -27,10 +27,13 @@ import { ListarClasesUseCase } from "../application/use-cases/clase/ListarClases
 import { ObtenerConfiguracionGimnasioUseCase } from "../application/use-cases/ajustes/ObtenerConfiguracionGimnasioUseCase.js";
 import { ActualizarConfiguracionGimnasioUseCase } from "../application/use-cases/ajustes/ActualizarConfiguracionGimnasioUseCase.js";
 import { CambiarPasswordUseCase } from "../application/use-cases/auth/CambiarPasswordUseCase.js";
+import { ImportarAlumnoPorFotoUseCase } from "../application/use-cases/alumno/ImportarAlumnoPorFotoUseCase.js";
+import { GeminiVisionExtractionService } from "../infrastructure/adapters/vision/GeminiVisionExtractionService.js";
 
 export interface EnvConfig {
   jwtAccessSecret: string;
   jwtRefreshSecret: string;
+  geminiApiKey: string;
 }
 
 /**
@@ -57,6 +60,7 @@ export interface Container {
   obtenerConfiguracionGimnasioUseCase: ObtenerConfiguracionGimnasioUseCase;
   actualizarConfiguracionGimnasioUseCase: ActualizarConfiguracionGimnasioUseCase;
   cambiarPasswordUseCase: CambiarPasswordUseCase;
+  importarAlumnoPorFotoUseCase: ImportarAlumnoPorFotoUseCase;
 }
 
 export function crearContainer(env: EnvConfig): Container {
@@ -74,6 +78,7 @@ export function crearContainer(env: EnvConfig): Container {
   });
   const clock = new SystemClock();
   const registrarCuotasDelMes = new RegistrarCuotasDelMesUseCase(alumnoRepository, cuotaRepository, clock);
+  const visionExtractionService = new GeminiVisionExtractionService(env.geminiApiKey);
 
   return {
     clock,
@@ -110,5 +115,6 @@ export function crearContainer(env: EnvConfig): Container {
       configuracionGimnasioRepository
     ),
     cambiarPasswordUseCase: new CambiarPasswordUseCase(usuarioRepository, passwordHasher),
+    importarAlumnoPorFotoUseCase: new ImportarAlumnoPorFotoUseCase(visionExtractionService),
   };
 }

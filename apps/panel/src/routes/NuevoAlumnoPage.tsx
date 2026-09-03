@@ -1,12 +1,20 @@
-import { useState, type FormEvent, type ReactNode } from "react";
+import { useEffect, useState, type FormEvent, type ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
-import type { AlumnoDTO, CrearAlumnoRequestDTO, Disciplina } from "@fighters-gym/shared-types";
+import type {
+  AlumnoDTO,
+  CrearAlumnoRequestDTO,
+  Disciplina,
+  ConfiguracionGimnasioDTO,
+  DatosAlumnoExtraidosDTO,
+} from "@fighters-gym/shared-types";
 import { useAuth } from "../lib/AuthContext.js";
 import { ApiError, peticionApi } from "../lib/apiClient.js";
 import { PanelLayout } from "../components/PanelLayout.js";
 import { AlumnoAvatar } from "../components/AlumnoAvatar.js";
 import { CATALOGO_DISCIPLINAS } from "../lib/disciplinas.js";
 import { sugerirCuotaMensual } from "../lib/precios.js";
+
+const FECHA_ISO_REGEX = /^\d{4}-\d{2}-\d{2}$/;
 
 interface FormularioAlumno {
   nombre: string;
@@ -37,8 +45,84 @@ export function NuevoAlumnoPage() {
   const [cuotaTocadaAMano, setCuotaTocadaAMano] = useState(false);
   const [enviando, setEnviando] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [configuracion, setConfiguracion] = useState<ConfiguracionGimnasioDTO | null>(null);
+  const [subiendoFoto, setSubiendoFoto] = useState(false);
+  const [errorFoto, setErrorFoto] = useState<string | null>(null);
+  const [camposParaRevisar, setCamposParaRevisar] = useState<Set<keyof FormularioAlumno>>(new Set());
+
+  useEffect(() => {
+    if (accessToken === null) {
+      return;
+    }
+    peticionApi<ConfiguracionGimnasioDTO>("/ajustes", { accessToken })
+      .then(setConfiguracion)
+      .catch(() => {
+        // Si no carga, simplemente no se muestra el escaneo — el formulario manual sigue funcionando.
+      });
+  }, [accessToken]);
+
+  async function procesarFoto(archivo: File): Promise<void> {
+    if (accessToken === null) {
+      return;
+    }
+    setErrorFoto(null);
+    setSubiendoFoto(true);
+    try {
+      const formData = new FormData();
+      formData.append("archivo", archivo);
+      const datos = await peticionApi<DatosAlumnoExtraidosDTO>("/alumnos/importar-foto", {
+        method: "POST",
+        accessToken,
+        body: formData,
+      });
+
+      const revisar = new Set<keyof FormularioAlumno>();
+      function marcarSiHayDudas(campo: keyof FormularioAlumno, tieneValor: boolean, confianza: "alta" | "baja") {
+        if (confianza === "baja" && tieneValor) {
+          revisar.add(campo);
+        }
+      }
+
+      const fechaNacimiento = FECHA_ISO_REGEX.test(datos.fechaNacimiento.valor) ? datos.fechaNacimiento.valor : "";
+      marcarSiHayDudas("nombre", datos.nombre.valor.trim().length > 0, datos.nombre.confianza);
+      marcarSiHayDudas("apellidos", datos.apellidos.valor.trim().length > 0, datos.apellidos.confianza);
+      marcarSiHayDudas("telefono", datos.telefono.valor.trim().length > 0, datos.telefono.confianza);
+      marcarSiHayDudas("dniNie", datos.dniNie.valor.trim().length > 0, datos.dniNie.confianza);
+      marcarSiHayDudas("fechaNacimiento", fechaNacimiento.length > 0, datos.fechaNacimiento.confianza);
+      marcarSiHayDudas("disciplinas", datos.disciplinas.valor.length > 0, datos.disciplinas.confianza);
+      setCamposParaRevisar(revisar);
+
+      setFormulario({
+        nombre: datos.nombre.valor.trim(),
+        apellidos: datos.apellidos.valor.trim(),
+        telefono: datos.telefono.valor.trim(),
+        email: datos.email.valor?.trim() ?? "",
+        dniNie: datos.dniNie.valor.trim(),
+        fechaNacimiento,
+        disciplinas: datos.disciplinas.valor,
+        cuotaMensual: String(sugerirCuotaMensual(datos.disciplinas.valor)),
+      });
+      setCuotaTocadaAMano(false);
+    } catch (err) {
+      setErrorFoto(err instanceof ApiError ? err.message : "No se ha podido leer la foto.");
+    } finally {
+      setSubiendoFoto(false);
+    }
+  }
+
+  function limpiarRevisar(campo: keyof FormularioAlumno): void {
+    setCamposParaRevisar((actual) => {
+      if (!actual.has(campo)) {
+        return actual;
+      }
+      const nuevo = new Set(actual);
+      nuevo.delete(campo);
+      return nuevo;
+    });
+  }
 
   function alternarDisciplina(valor: Disciplina): void {
+    limpiarRevisar("disciplinas");
     setFormulario((actual) => {
       const yaSeleccionada = actual.disciplinas.includes(valor);
       const disciplinas = yaSeleccionada
@@ -91,17 +175,37 @@ export function NuevoAlumnoPage() {
         directamente — revísalos siempre antes de guardar.
       </p>
 
-      <div className="tarjeta-panel escaneo-foto escaneo-foto--proximamente" title="Próximamente">
-        <div className="escaneo-foto-info">
-          <div className="tarjeta-panel-titulo">Sube o haz una foto de la ficha</div>
-          <span className="texto-muted">
-            Escaneo por IA — próximamente. De momento, rellena el formulario de abajo a mano.
-          </span>
+      {configuracion?.escaneoFichasActivo === true && (
+        <div className="tarjeta-panel escaneo-foto">
+          <div className="escaneo-foto-info">
+            <div className="tarjeta-panel-titulo">Sube o haz una foto de la ficha</div>
+            <span className="texto-muted">
+              La IA rellena el formulario de abajo — revisa siempre los datos antes de guardar.
+            </span>
+            {errorFoto !== null && <p className="mensaje-error">{errorFoto}</p>}
+          </div>
+          {subiendoFoto ? (
+            <span className="escaneo-foto-subiendo">Leyendo la ficha…</span>
+          ) : (
+            <label className="boton-primario boton-primario--compacto" style={{ cursor: "pointer" }}>
+              Tomar foto
+              <input
+                type="file"
+                accept="image/*"
+                capture="environment"
+                style={{ display: "none" }}
+                onChange={(evento) => {
+                  const archivo = evento.target.files?.[0];
+                  evento.target.value = "";
+                  if (archivo !== undefined) {
+                    void procesarFoto(archivo);
+                  }
+                }}
+              />
+            </label>
+          )}
         </div>
-        <span className="boton-primario boton-primario--compacto boton-primario--deshabilitado">
-          Tomar foto
-        </span>
-      </div>
+      )}
 
       {error !== null && <p className="mensaje-error">{error}</p>}
 
@@ -112,31 +216,43 @@ export function NuevoAlumnoPage() {
         </div>
 
         <div className="formulario-grid">
-          <Campo etiqueta="Nombre" obligatorio>
+          <Campo etiqueta="Nombre" obligatorio revisar={camposParaRevisar.has("nombre")}>
             <input
               value={formulario.nombre}
-              onChange={(e) => setFormulario((f) => ({ ...f, nombre: e.target.value }))}
+              onChange={(e) => {
+                limpiarRevisar("nombre");
+                setFormulario((f) => ({ ...f, nombre: e.target.value }));
+              }}
               required
             />
           </Campo>
-          <Campo etiqueta="Apellidos" obligatorio>
+          <Campo etiqueta="Apellidos" obligatorio revisar={camposParaRevisar.has("apellidos")}>
             <input
               value={formulario.apellidos}
-              onChange={(e) => setFormulario((f) => ({ ...f, apellidos: e.target.value }))}
+              onChange={(e) => {
+                limpiarRevisar("apellidos");
+                setFormulario((f) => ({ ...f, apellidos: e.target.value }));
+              }}
               required
             />
           </Campo>
-          <Campo etiqueta="Teléfono" obligatorio>
+          <Campo etiqueta="Teléfono" obligatorio revisar={camposParaRevisar.has("telefono")}>
             <input
               value={formulario.telefono}
-              onChange={(e) => setFormulario((f) => ({ ...f, telefono: e.target.value }))}
+              onChange={(e) => {
+                limpiarRevisar("telefono");
+                setFormulario((f) => ({ ...f, telefono: e.target.value }));
+              }}
               required
             />
           </Campo>
-          <Campo etiqueta="DNI / NIE" obligatorio>
+          <Campo etiqueta="DNI / NIE" obligatorio revisar={camposParaRevisar.has("dniNie")}>
             <input
               value={formulario.dniNie}
-              onChange={(e) => setFormulario((f) => ({ ...f, dniNie: e.target.value }))}
+              onChange={(e) => {
+                limpiarRevisar("dniNie");
+                setFormulario((f) => ({ ...f, dniNie: e.target.value }));
+              }}
               required
             />
           </Campo>
@@ -147,11 +263,18 @@ export function NuevoAlumnoPage() {
               onChange={(e) => setFormulario((f) => ({ ...f, email: e.target.value }))}
             />
           </Campo>
-          <Campo etiqueta="Fecha de nacimiento" obligatorio>
+          <Campo
+            etiqueta="Fecha de nacimiento"
+            obligatorio
+            revisar={camposParaRevisar.has("fechaNacimiento")}
+          >
             <input
               type="date"
               value={formulario.fechaNacimiento}
-              onChange={(e) => setFormulario((f) => ({ ...f, fechaNacimiento: e.target.value }))}
+              onChange={(e) => {
+                limpiarRevisar("fechaNacimiento");
+                setFormulario((f) => ({ ...f, fechaNacimiento: e.target.value }));
+              }}
               required
             />
           </Campo>
@@ -173,6 +296,9 @@ export function NuevoAlumnoPage() {
               </button>
             ))}
           </div>
+          {camposParaRevisar.has("disciplinas") && (
+            <span className="campo-revisar-nota">La IA no está segura de estas disciplinas — revísalas.</span>
+          )}
         </div>
 
         <Campo etiqueta="Cuota mensual (€)" obligatorio>
@@ -206,18 +332,21 @@ export function NuevoAlumnoPage() {
 function Campo({
   etiqueta,
   obligatorio,
+  revisar,
   children,
 }: {
   etiqueta: string;
   obligatorio?: boolean;
+  revisar?: boolean;
   children: ReactNode;
 }) {
   return (
-    <div className="campo">
+    <div className={`campo${revisar === true ? " campo--revisar" : ""}`}>
       <label>
         {etiqueta} {obligatorio === true && <span className="campo-obligatorio">*</span>}
       </label>
       {children}
+      {revisar === true && <span className="campo-revisar-nota">La IA no está segura — revisa este dato.</span>}
     </div>
   );
 }

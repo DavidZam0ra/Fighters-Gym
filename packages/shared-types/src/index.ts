@@ -44,6 +44,21 @@ export interface ActualizarNotasRequestDTO {
   notas: string | null;
 }
 
+export interface CampoExtraidoDTO<T> {
+  valor: T;
+  confianza: "alta" | "baja";
+}
+
+export interface DatosAlumnoExtraidosDTO {
+  nombre: CampoExtraidoDTO<string>;
+  apellidos: CampoExtraidoDTO<string>;
+  telefono: CampoExtraidoDTO<string>;
+  email: CampoExtraidoDTO<string | null>;
+  dniNie: CampoExtraidoDTO<string>;
+  fechaNacimiento: CampoExtraidoDTO<string>;
+  disciplinas: CampoExtraidoDTO<Disciplina[]>;
+}
+
 export interface CrearAlumnoRequestDTO {
   nombre: string;
   apellidos: string;

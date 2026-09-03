@@ -1097,6 +1097,20 @@ button:disabled {
   font-size: 12px;
 }
 
+.campo--revisar input {
+  border-color: var(--color-aviso);
+}
+
+.campo-revisar-nota {
+  font-size: 11px;
+  color: var(--color-aviso);
+}
+
+.escaneo-foto-subiendo {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
 .disciplinas-selector {
   display: flex;
   flex-wrap: wrap;

@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import Fastify, { type FastifyInstance } from "fastify";
 import cookie from "@fastify/cookie";
+import multipart from "@fastify/multipart";
 import { registrarManejadorErrores } from "../errorHandler.js";
 import { registrarRutasAuth } from "../routes/auth.routes.js";
 import { registrarRutasAlumnos } from "../routes/alumno.routes.js";
@@ -27,6 +28,7 @@ import { ListarClasesUseCase } from "../../../application/use-cases/clase/Listar
 import { ObtenerConfiguracionGimnasioUseCase } from "../../../application/use-cases/ajustes/ObtenerConfiguracionGimnasioUseCase.js";
 import { ActualizarConfiguracionGimnasioUseCase } from "../../../application/use-cases/ajustes/ActualizarConfiguracionGimnasioUseCase.js";
 import { CambiarPasswordUseCase } from "../../../application/use-cases/auth/CambiarPasswordUseCase.js";
+import { ImportarAlumnoPorFotoUseCase } from "../../../application/use-cases/alumno/ImportarAlumnoPorFotoUseCase.js";
 import {
   AlumnoRepositoryFake,
   CuotaRepositoryFake,
@@ -34,6 +36,7 @@ import {
   ClaseRepositoryFake,
   UsuarioRepositoryFake,
   ConfiguracionGimnasioRepositoryFake,
+  VisionExtractionServiceFake,
   PasswordHasherFake,
   TokenServiceFake,
   ClockFake,
@@ -93,11 +96,13 @@ async function construirApp(): Promise<{
     obtenerConfiguracionGimnasioUseCase: new ObtenerConfiguracionGimnasioUseCase(configuracionGimnasio),
     actualizarConfiguracionGimnasioUseCase: new ActualizarConfiguracionGimnasioUseCase(configuracionGimnasio),
     cambiarPasswordUseCase: new CambiarPasswordUseCase(usuarios, hasher),
+    importarAlumnoPorFotoUseCase: new ImportarAlumnoPorFotoUseCase(new VisionExtractionServiceFake()),
   };
 
   const app = Fastify();
   registrarManejadorErrores(app);
   await app.register(cookie);
+  await app.register(multipart);
   registrarRutasAuth(app, container);
   registrarRutasAlumnos(app, container);
   registrarRutasUsuario(app, container);
@@ -287,6 +292,42 @@ describe("Rutas de alumnos", () => {
     });
 
     expect(respuesta.statusCode).toBe(404);
+  });
+
+  it("POST /alumnos/importar-foto exige autenticación", async () => {
+    const { app } = await construirApp();
+    const respuesta = await app.inject({ method: "POST", url: "/alumnos/importar-foto" });
+    expect(respuesta.statusCode).toBe(401);
+  });
+
+  it("extrae los datos de una foto de ficha usando el servicio de visión", async () => {
+    const { app, tokens } = await construirApp();
+    const { accessToken } = await tokens.emitir("usuario-1");
+
+    const boundary = "----test-boundary";
+    const cuerpo = Buffer.concat([
+      Buffer.from(
+        `--${boundary}\r\nContent-Disposition: form-data; name="archivo"; filename="ficha.jpg"\r\nContent-Type: image/jpeg\r\n\r\n`
+      ),
+      Buffer.from([0xff, 0xd8, 0xff, 0xdb]), // cabecera JPEG mínima, el contenido no importa (el fake ignora la imagen)
+      Buffer.from(`\r\n--${boundary}--\r\n`),
+    ]);
+
+    const respuesta = await app.inject({
+      method: "POST",
+      url: "/alumnos/importar-foto",
+      headers: {
+        authorization: `Bearer ${accessToken}`,
+        "content-type": `multipart/form-data; boundary=${boundary}`,
+      },
+      payload: cuerpo,
+    });
+
+    expect(respuesta.statusCode).toBe(200);
+    const datos = respuesta.json();
+    expect(datos.nombre.valor).toBe("Carla");
+    expect(datos.dniNie.confianza).toBe("baja");
+    expect(datos.disciplinas.valor).toEqual(["kickboxing", "muay_thai"]);
   });
 });
 

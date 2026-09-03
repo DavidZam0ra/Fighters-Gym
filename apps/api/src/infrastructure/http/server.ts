@@ -2,7 +2,8 @@ import "dotenv/config";
 import Fastify from "fastify";
 import cors from "@fastify/cors";
 import cookie from "@fastify/cookie";
-import { crearContainer } from "../../composition-root/container.js";
+import multipart from "@fastify/multipart";
+import { crearContainer, type EnvConfig } from "../../composition-root/container.js";
 import { registrarManejadorErrores } from "./errorHandler.js";
 import { registrarRutasAuth } from "./routes/auth.routes.js";
 import { registrarRutasAlumnos } from "./routes/alumno.routes.js";
@@ -20,8 +21,13 @@ async function main(): Promise<void> {
   if (jwtAccessSecret === undefined || jwtRefreshSecret === undefined) {
     throw new Error("Faltan JWT_ACCESS_SECRET / JWT_REFRESH_SECRET en el entorno.");
   }
+  const geminiApiKey = process.env["GEMINI_API_KEY"];
+  if (geminiApiKey === undefined || geminiApiKey.length === 0) {
+    throw new Error("Falta GEMINI_API_KEY en el entorno.");
+  }
+  const env: EnvConfig = { jwtAccessSecret, jwtRefreshSecret, geminiApiKey };
 
-  const container = crearContainer({ jwtAccessSecret, jwtRefreshSecret });
+  const container = crearContainer(env);
 
   const app = Fastify({ logger: true });
   registrarManejadorErrores(app);
@@ -31,6 +37,9 @@ async function main(): Promise<void> {
     credentials: true,
   });
   await app.register(cookie);
+  await app.register(multipart, {
+    limits: { fileSize: 10 * 1024 * 1024 }, // 10MB — de sobra para una foto de móvil
+  });
 
   app.get("/health", async () => ({ ok: true }));
   registrarRutasAuth(app, container);

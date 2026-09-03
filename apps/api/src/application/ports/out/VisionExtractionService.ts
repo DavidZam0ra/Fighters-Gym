@@ -13,6 +13,14 @@ export interface DatosAlumnoExtraidos {
   disciplinas: CampoExtraido<string[]>;
 }
 
+/** Cualquier adapter (Gemini, Claude...) lanza esto ante un fallo del proveedor de IA. */
+export class VisionExtractionError extends Error {
+  constructor(mensaje: string) {
+    super(mensaje);
+    this.name = "VisionExtractionError";
+  }
+}
+
 /**
  * Puerto agnóstico del proveedor — la elección entre Claude/Gemini para
  * leer las hojas de inscripción manuscritas (ver §7 del plan) se resuelve

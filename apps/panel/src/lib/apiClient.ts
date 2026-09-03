@@ -31,7 +31,10 @@ export async function peticionApi<T>(ruta: string, opciones: PeticionOptions = {
   // Solo mandamos Content-Type/body cuando hay cuerpo de verdad — Fastify
   // rechaza con error un application/json con cuerpo vacío (p. ej. en
   // /auth/refresh, que no lleva body).
-  if (opciones.body !== undefined) {
+  if (opciones.body instanceof FormData) {
+    // Sin Content-Type manual: el navegador añade el boundary correcto solo.
+    init.body = opciones.body;
+  } else if (opciones.body !== undefined) {
     headers["Content-Type"] = "application/json";
     init.body = JSON.stringify(opciones.body);
   }
