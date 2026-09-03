@@ -32,5 +32,14 @@ export default tseslint.config(
     rules: {
       "no-restricted-imports": "off",
     },
+  },
+  {
+    // scripts/ son utilidades de desarrollo puntuales (sembrado de datos de
+    // carga, limpieza…), no parte de la app desplegada — no sujetas al
+    // límite arquitectónico de @prisma/client.
+    files: ["scripts/**/*.ts"],
+    rules: {
+      "no-restricted-imports": "off",
+    },
   }
 );
