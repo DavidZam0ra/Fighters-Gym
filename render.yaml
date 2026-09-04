@@ -14,6 +14,11 @@ services:
     name: fighters-gym-api
     runtime: node
     plan: free
+    # Frankfurt, no el Oregon por defecto de Render: el gimnasio está en
+    # Valencia y la base de datos de Neon (ver DATABASE_URL) ya vive en
+    # eu-central-1 (Frankfurt) — así se minimiza la latencia tanto hacia el
+    # panel/landing como hacia la propia base de datos.
+    region: frankfurt
     healthCheckPath: /health
     buildCommand: pnpm install --frozen-lockfile && pnpm --filter @fighters-gym/api prisma:generate && pnpm --filter @fighters-gym/api build
     startCommand: pnpm --filter @fighters-gym/api start
