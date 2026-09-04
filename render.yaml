@@ -54,7 +54,7 @@ services:
         destination: /index.html
 
   - type: web
-    name: fighters-gym-landing
+    name: fighters-gym
     runtime: static
     buildCommand: pnpm install --frozen-lockfile && pnpm --filter @fighters-gym/landing build
     staticPublishPath: apps/landing/out
