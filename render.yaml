@@ -1,13 +1,19 @@
-# Render blueprint. Tres servicios: el API (Web Service, siempre despierto) y
-# panel + landing como Static Sites, cada uno en su propia URL de *.onrender.com
-# por ahora. La unificación bajo un único dominio (fightersgym.com) vía rewrites
-# de la landing — ver §5 del plan — queda pendiente hasta tener el dominio
+# Render blueprint. Tres servicios: el API (Web Service) y panel + landing
+# como Static Sites, cada uno en su propia URL de *.onrender.com por ahora.
+# La unificación bajo un único dominio (fightersgym.com) vía rewrites de la
+# landing — ver §5 del plan — queda pendiente hasta tener el dominio
 # comprado; hoy solo hace falta que Rafa pueda entrar a probar.
+#
+# El API va en plan "free" a propósito (no "starter", ~7$/mes): sin tarjeta
+# de por medio por ahora. El coste real es que se duerme a los 15 min sin
+# tráfico y la primera visita del día tarda 30-50s en despertar — asumible
+# mientras solo lo prueba Rafa. Cuando convenga pasar a Starter, se cambia
+# el plan desde el propio dashboard de Render, sin tocar código.
 services:
   - type: web
     name: fighters-gym-api
     runtime: node
-    plan: starter
+    plan: free
     healthCheckPath: /health
     buildCommand: pnpm install --frozen-lockfile && pnpm --filter @fighters-gym/api prisma:generate && pnpm --filter @fighters-gym/api build
     startCommand: pnpm --filter @fighters-gym/api start
