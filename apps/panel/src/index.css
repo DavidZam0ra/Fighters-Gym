@@ -820,21 +820,37 @@ button:disabled {
   border-color: #3a383c;
 }
 
-.fila-cuota {
+.fila-alumno-cuota {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 10px;
   padding: 14px 16px;
   border-bottom: 1px solid var(--border-subtle);
 }
 
-.fila-cuota:last-child {
+.fila-alumno-cuota:last-child {
   border-bottom: none;
 }
 
-.fila-cuota-nombre {
-  font-size: 14px;
-  font-weight: 600;
+.fila-alumno-cuota:hover {
+  background: var(--bg-input);
+}
+
+.fila-alumno-cuota-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  color: var(--text);
+}
+
+.fila-alumno-cuota-detalle {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  font-size: 13px;
+  padding-left: 48px;
 }
 
 .fila-cuota-accion {
@@ -880,11 +896,18 @@ button:disabled {
     grid-template-columns: repeat(3, 1fr);
   }
 
-  .fila-cuota {
+  .fila-alumno-cuota {
     display: grid;
-    grid-template-columns: 2fr 1fr 1.2fr 1fr auto;
+    grid-template-columns: 2.2fr 0.9fr 1.2fr 1fr auto;
     align-items: center;
     gap: 12px;
+  }
+
+  .fila-alumno-cuota-detalle {
+    /* Los 3 hijos (precio, último pago, estado) pasan a ser celdas propias
+       del grid de arriba, en vez de un bloque — así ocupan sus 3 columnas
+       sin anidar un grid dentro de otro. */
+    display: contents;
   }
 
   .fila-cuota-accion {
@@ -1250,11 +1273,15 @@ button:disabled {
   .alumnos-cabecera-acciones {
     flex-direction: row;
     align-items: center;
-    justify-content: space-between;
+    flex-wrap: wrap;
   }
 
   .alumnos-cabecera-acciones .campo-busqueda {
-    max-width: 320px;
+    max-width: 260px;
+  }
+
+  .alumnos-cabecera-acciones .boton-nuevo-alumno {
+    margin-left: auto;
   }
 
   .escaneo-foto {

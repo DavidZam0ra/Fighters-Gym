@@ -50,22 +50,6 @@ export function DashboardSkeleton() {
 
 export function AlumnosSkeleton() {
   return (
-    <div className="lista-tarjeta lista-tarjeta--alumnos">
-      {[0, 1, 2, 3, 4, 5].map((i) => (
-        <div className="skeleton-fila-alumno" key={i}>
-          <Skeleton width="36px" height="36px" className="skeleton-circulo" />
-          <div className="skeleton-fila-alumno-info">
-            <Skeleton width="45%" height="13px" />
-            <Skeleton width="65%" height="11px" />
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-export function CuotasSkeleton() {
-  return (
     <>
       <div className="tarjetas-kpi tarjetas-kpi--cuotas">
         {[0, 1, 2].map((i) => (
@@ -76,9 +60,18 @@ export function CuotasSkeleton() {
           </div>
         ))}
       </div>
-      <div className="lista-tarjeta">
-        {[0, 1, 2, 3, 4].map((i) => (
-          <FilaListaSkeleton key={i} />
+
+      <div className="lista-tarjeta lista-tarjeta--alumnos">
+        {[0, 1, 2, 3, 4, 5].map((i) => (
+          <div className="skeleton-fila-alumno" key={i}>
+            <Skeleton width="36px" height="36px" className="skeleton-circulo" />
+            <div className="skeleton-fila-alumno-info">
+              <Skeleton width="45%" height="13px" />
+              <Skeleton width="65%" height="11px" />
+            </div>
+            <Skeleton width="50px" height="13px" />
+            <Skeleton width="70px" height="20px" radius="999px" />
+          </div>
         ))}
       </div>
     </>

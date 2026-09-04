@@ -14,7 +14,6 @@ const ENLACES_NAV: EnlaceNav[] = [
   { to: "/home", etiqueta: "Dashboard", icono: "dashboard" },
   { to: "/alumnos", etiqueta: "Alumnos", icono: "alumnos" },
   { to: "/calendario", etiqueta: "Calendario", icono: "calendario" },
-  { to: "/cuotas", etiqueta: "Cuotas", icono: "cuotas" },
 ];
 
 const ENLACES_CUENTA: EnlaceNav[] = [{ to: "/ajustes", etiqueta: "Ajustes", icono: "ajustes" }];
