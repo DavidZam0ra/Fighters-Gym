@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import type { CuotaDelMesDTO, EstadoCuota, MetodoPago } from "@fighters-gym/shared-types";
 import { useAuth } from "../lib/AuthContext.js";
-import { peticionApi } from "../lib/apiClient.js";
+import { ApiError, peticionApi } from "../lib/apiClient.js";
 import { PanelLayout } from "../components/PanelLayout.js";
 import { CuotasSkeleton } from "../components/PageSkeletons.js";
 
@@ -39,16 +39,21 @@ export function CuotasPage() {
   const [metodoElegido, setMetodoElegido] = useState<Record<string, MetodoPago>>({});
   const [confirmando, setConfirmando] = useState<string | null>(null);
 
-  function cargar(): void {
+  async function cargar(): Promise<void> {
     if (accessToken === null) {
       return;
     }
-    peticionApi<CuotaDelMesDTO[]>("/cuotas", { accessToken })
-      .then(setCuotas)
-      .catch(() => setError("No se han podido cargar las cuotas."));
+    try {
+      const datos = await peticionApi<CuotaDelMesDTO[]>("/cuotas", { accessToken });
+      setCuotas(datos);
+    } catch {
+      setError("No se han podido cargar las cuotas.");
+    }
   }
 
-  useEffect(cargar, [accessToken]);
+  useEffect(() => {
+    void cargar();
+  }, [accessToken]);
 
   const resumen = useMemo(() => {
     const base = { pagado: { total: 0, alumnos: 0 }, pendiente: { total: 0, alumnos: 0 }, atrasado: { total: 0, alumnos: 0 } };
@@ -74,6 +79,7 @@ export function CuotasPage() {
       return;
     }
     const metodo = metodoElegido[cuotaId] ?? "bizum";
+    setError(null);
     setConfirmando(cuotaId);
     try {
       await peticionApi(`/cuotas/${cuotaId}/confirmar`, {
@@ -81,9 +87,20 @@ export function CuotasPage() {
         accessToken,
         body: { metodo },
       });
-      cargar();
-    } catch {
-      setError("No se ha podido confirmar el pago.");
+      // Se espera a que la lista se recargue de verdad antes de reactivar el
+      // botón (ver el `finally` de abajo) — si no, un segundo clic durante
+      // la ventana en la que ya está confirmada en el servidor pero la
+      // pantalla todavía no se ha enterado, dispara una doble confirmación.
+      await cargar();
+    } catch (err) {
+      if (err instanceof ApiError && err.status === 409) {
+        // La cuota ya estaba confirmada (otra pestaña, doble clic...) — no es
+        // un fallo real, así que se refresca la lista para que se vea al día.
+        setError("Esta cuota ya estaba confirmada.");
+        await cargar();
+      } else {
+        setError("No se ha podido confirmar el pago.");
+      }
     } finally {
       setConfirmando(null);
     }

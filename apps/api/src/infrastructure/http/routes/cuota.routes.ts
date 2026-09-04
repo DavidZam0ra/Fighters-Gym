@@ -4,6 +4,7 @@ import { confirmarPagoSchema } from "../schemas/cuota.schemas.js";
 import { idParamSchema } from "../schemas/common.schemas.js";
 import { aCuotaDelMesDTO } from "../mappers/cuota.mapper.js";
 import { CuotaNoEncontradaError } from "../../../application/use-cases/cuota/ConfirmarPagoUseCase.js";
+import { CuotaYaConfirmadaError } from "../../../domain/cuota/errors.js";
 import type { Container } from "../../../composition-root/container.js";
 
 export function registrarRutasCuotas(app: FastifyInstance, container: Container): void {
@@ -33,6 +34,12 @@ export function registrarRutasCuotas(app: FastifyInstance, container: Container)
     } catch (error) {
       if (error instanceof CuotaNoEncontradaError) {
         return reply.code(404).send({ error: error.message });
+      }
+      if (error instanceof CuotaYaConfirmadaError) {
+        // 409 Conflict, no 500: dos clics seguidos (o dos pestañas) sobre la
+        // misma cuota no son un fallo del servidor, es un estado que ya
+        // cambió por debajo — el cliente debe poder distinguirlo y refrescar.
+        return reply.code(409).send({ error: error.message });
       }
       throw error;
     }

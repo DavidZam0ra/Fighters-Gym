@@ -441,6 +441,48 @@ describe("Rutas de cuotas", () => {
 
     expect(respuesta.statusCode).toBe(404);
   });
+
+  it("devuelve 409 (no 500) al confirmar dos veces la misma cuota", async () => {
+    const { app, tokens } = await construirApp();
+    const { accessToken } = await tokens.emitir("usuario-1");
+    const cabeceras = { authorization: `Bearer ${accessToken}` };
+
+    await app.inject({
+      method: "POST",
+      url: "/alumnos",
+      headers: cabeceras,
+      payload: {
+        nombre: "Nuria",
+        apellidos: "Alberola",
+        telefono: "600111333",
+        email: null,
+        dniNie: "33333333C",
+        fechaNacimiento: "1998-05-01",
+        cuotaMensual: 45,
+        disciplinas: ["boxeo"],
+      },
+    });
+    const [cuota] = (await app.inject({ method: "GET", url: "/cuotas", headers: cabeceras })).json();
+
+    const primeraConfirmacion = await app.inject({
+      method: "POST",
+      url: `/cuotas/${cuota.cuotaId}/confirmar`,
+      headers: cabeceras,
+      payload: { metodo: "bizum" },
+    });
+    expect(primeraConfirmacion.statusCode).toBe(204);
+
+    // Segundo clic (doble clic, dos pestañas...) sobre una cuota que el
+    // servidor ya dio por pagada — regresión del bug real: antes esto caía
+    // en un 500 "Error interno" genérico en vez de un 409 explicable.
+    const segundaConfirmacion = await app.inject({
+      method: "POST",
+      url: `/cuotas/${cuota.cuotaId}/confirmar`,
+      headers: cabeceras,
+      payload: { metodo: "bizum" },
+    });
+    expect(segundaConfirmacion.statusCode).toBe(409);
+  });
 });
 
 describe("GET /clases", () => {

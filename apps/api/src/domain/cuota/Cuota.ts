@@ -1,6 +1,7 @@
 import { EstadoCuota } from "./EstadoCuota.js";
 import { MetodoPago } from "./MetodoPago.js";
 import { Periodo } from "./Periodo.js";
+import { CuotaYaConfirmadaError } from "./errors.js";
 
 const DIAS_DE_MARGEN = 5;
 
@@ -62,7 +63,7 @@ export class Cuota {
 
   confirmarPago(usuarioId: string, metodo: MetodoPago, fechaPago: Date): void {
     if (this._fechaPago !== null) {
-      throw new Error(`La cuota ${this.id} ya está confirmada como pagada.`);
+      throw new CuotaYaConfirmadaError(this.id);
     }
     this._metodo = metodo;
     this._fechaPago = fechaPago;

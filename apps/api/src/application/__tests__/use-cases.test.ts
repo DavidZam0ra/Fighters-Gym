@@ -6,6 +6,7 @@ import { ConfirmarPagoUseCase } from "../use-cases/cuota/ConfirmarPagoUseCase.js
 import { LoginUseCase, CredencialesInvalidasError } from "../use-cases/auth/LoginUseCase.js";
 import { Cuota } from "../../domain/cuota/Cuota.js";
 import { Periodo } from "../../domain/cuota/Periodo.js";
+import { CuotaYaConfirmadaError } from "../../domain/cuota/errors.js";
 import { Usuario } from "../../domain/usuario/Usuario.js";
 import {
   AlumnoRepositoryFake,
@@ -158,6 +159,26 @@ describe("ConfirmarPagoUseCase — regla de atraso (5 días de margen)", () => {
     const cuotaActualizada = await cuotas.buscarPorId(cuota.id);
     expect(cuotaActualizada?.estadoActual(clock.now())).toBe("pagado");
     expect(cuotaActualizada?.confirmadoPor).toBe("usuario-1");
+  });
+
+  it("lanza CuotaYaConfirmadaError al confirmar dos veces la misma cuota", async () => {
+    const cuota = new Cuota({
+      id: "cuota-4",
+      alumnoId: "alumno-1",
+      periodo: periodoAgosto,
+      importe: 50,
+      metodo: null,
+      fechaPago: null,
+      confirmadoPor: null,
+    });
+    await cuotas.guardar(cuota);
+
+    const useCase = new ConfirmarPagoUseCase(cuotas, clock);
+    await useCase.ejecutar({ cuotaId: cuota.id, usuarioId: "usuario-1", metodo: "bizum" });
+
+    await expect(
+      useCase.ejecutar({ cuotaId: cuota.id, usuarioId: "usuario-1", metodo: "efectivo" })
+    ).rejects.toThrow(CuotaYaConfirmadaError);
   });
 });
 
