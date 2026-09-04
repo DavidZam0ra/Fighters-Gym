@@ -1045,6 +1045,15 @@ button:disabled {
   background: var(--bg-input);
 }
 
+.alumno-avatar--fallback {
+  background: var(--accent);
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+}
+
 .escaneo-foto {
   display: flex;
   flex-direction: column;
