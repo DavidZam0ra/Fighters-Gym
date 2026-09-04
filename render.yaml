@@ -1,5 +1,8 @@
-# Render blueprint. Por ahora solo el API — los Static Sites de panel/landing
-# se añaden aquí en los pasos 6 y 9 del plan, cuando esas apps existan de verdad.
+# Render blueprint. Tres servicios: el API (Web Service, siempre despierto) y
+# panel + landing como Static Sites, cada uno en su propia URL de *.onrender.com
+# por ahora. La unificación bajo un único dominio (fightersgym.com) vía rewrites
+# de la landing — ver §5 del plan — queda pendiente hasta tener el dominio
+# comprado; hoy solo hace falta que Rafa pueda entrar a probar.
 services:
   - type: web
     name: fighters-gym-api
@@ -15,5 +18,32 @@ services:
         sync: false
       - key: JWT_REFRESH_SECRET
         sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+      # URL real del panel una vez desplegado (p. ej. https://fighters-gym-panel.onrender.com)
+      # — CORS con credentials:true exige un origen exacto, no vale "*".
       - key: CORS_ORIGIN
         sync: false
+
+  - type: web
+    name: fighters-gym-panel
+    runtime: static
+    buildCommand: pnpm install --frozen-lockfile && pnpm --filter @fighters-gym/panel build
+    staticPublishPath: apps/panel/dist
+    envVars:
+      # URL real del API una vez desplegado (p. ej. https://fighters-gym-api.onrender.com)
+      # — VITE_API_URL se hornea en el build, así que hay que ponerla ANTES de desplegar el panel.
+      - key: VITE_API_URL
+        sync: false
+    routes:
+      # SPA de una sola página (React Router) — cualquier ruta que no sea un
+      # archivo real cae en index.html, si no un F5 en /alumnos/nuevo da 404.
+      - type: rewrite
+        source: /*
+        destination: /index.html
+
+  - type: web
+    name: fighters-gym-landing
+    runtime: static
+    buildCommand: pnpm install --frozen-lockfile && pnpm --filter @fighters-gym/landing build
+    staticPublishPath: apps/landing/out
