@@ -1,7 +1,6 @@
 import "dotenv/config";
 import Fastify from "fastify";
 import cors from "@fastify/cors";
-import cookie from "@fastify/cookie";
 import multipart from "@fastify/multipart";
 import { crearContainer, type EnvConfig } from "../../composition-root/container.js";
 import { registrarManejadorErrores } from "./errorHandler.js";
@@ -34,9 +33,7 @@ async function main(): Promise<void> {
 
   await app.register(cors, {
     origin: process.env["CORS_ORIGIN"] ?? "http://localhost:5173",
-    credentials: true,
   });
-  await app.register(cookie);
   await app.register(multipart, {
     limits: { fileSize: 10 * 1024 * 1024 }, // 10MB — de sobra para una foto de móvil
   });

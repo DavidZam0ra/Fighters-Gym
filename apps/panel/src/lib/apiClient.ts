@@ -24,13 +24,9 @@ export async function peticionApi<T>(ruta: string, opciones: PeticionOptions = {
 
   const init: RequestInit = {
     method: opciones.method ?? "GET",
-    // Necesario para que la cookie httpOnly del refresh token viaje en
-    // /auth/login y /auth/refresh — el panel y el API son orígenes distintos.
-    credentials: "include",
   };
   // Solo mandamos Content-Type/body cuando hay cuerpo de verdad — Fastify
-  // rechaza con error un application/json con cuerpo vacío (p. ej. en
-  // /auth/refresh, que no lleva body).
+  // rechaza con error un application/json con cuerpo vacío.
   if (opciones.body instanceof FormData) {
     // Sin Content-Type manual: el navegador añade el boundary correcto solo.
     init.body = opciones.body;

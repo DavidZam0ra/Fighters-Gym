@@ -25,6 +25,14 @@ body,
   height: 100%;
 }
 
+html {
+  /* Sin esto, Safari/iOS a veces "infla" el tamaño del texto al entrar en la
+     PWA (heurística de legibilidad de WebKit) y la pantalla se ve ampliada
+     de golpe hasta que se interactúa. */
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
 body {
   margin: 0;
   background: var(--bg);

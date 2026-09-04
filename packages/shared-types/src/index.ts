@@ -123,6 +123,7 @@ export interface LoginRequestDTO {
 
 export interface LoginResponseDTO {
   accessToken: string;
+  refreshToken: string;
 }
 
 export type Rol = "admin" | "profesor";

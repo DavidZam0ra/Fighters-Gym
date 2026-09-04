@@ -5,6 +5,10 @@ export const loginSchema = z.object({
   password: z.string().min(1),
 });
 
+export const refreshSchema = z.object({
+  refreshToken: z.string().min(1),
+});
+
 export const cambiarPasswordSchema = z.object({
   passwordActual: z.string().min(1),
   passwordNueva: z.string().min(8),

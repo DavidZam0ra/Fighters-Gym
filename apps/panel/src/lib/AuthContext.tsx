@@ -1,10 +1,8 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
-import type { UsuarioActualDTO } from "@fighters-gym/shared-types";
+import type { LoginResponseDTO, UsuarioActualDTO } from "@fighters-gym/shared-types";
 import { peticionApi } from "./apiClient.js";
 
-interface LoginResponse {
-  accessToken: string;
-}
+const CLAVE_REFRESH_TOKEN = "fg_refresh_token";
 
 interface AuthContextValue {
   accessToken: string | null;
@@ -16,16 +14,42 @@ interface AuthContextValue {
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
+function guardarRefreshToken(valor: string): void {
+  try {
+    localStorage.setItem(CLAVE_REFRESH_TOKEN, valor);
+  } catch {
+    // Almacenamiento no disponible (navegación privada, etc.) — la sesión
+    // simplemente no sobrevivirá a un F5, no es un error fatal.
+  }
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [usuario, setUsuario] = useState<UsuarioActualDTO | null>(null);
   const [cargandoSesion, setCargandoSesion] = useState(true);
 
   useEffect(() => {
-    // Al cargar la app, intenta recuperar la sesión a partir de la cookie
-    // httpOnly de refresco (si existe) — así un F5 no obliga a re-loguearse.
-    peticionApi<LoginResponse>("/auth/refresh", { method: "POST" })
-      .then((respuesta) => setAccessToken(respuesta.accessToken))
+    // Al cargar la app, intenta recuperar la sesión a partir del refresh
+    // token guardado en localStorage (si existe) — así un F5, o volver a
+    // abrir la PWA, no obliga a re-loguearse. Guardado en localStorage y no
+    // en una cookie httpOnly porque panel y API son subdominios distintos de
+    // onrender.com (Public Suffix List): Safari/iOS bloquea por defecto las
+    // cookies de terceros y la sesión no sobrevivía en la PWA del móvil —
+    // ver memoria de proyecto "auth-localstorage-deuda-tecnica" para cuándo
+    // revertir esto a cookie httpOnly.
+    const refreshTokenGuardado = localStorage.getItem(CLAVE_REFRESH_TOKEN);
+    if (refreshTokenGuardado === null) {
+      setCargandoSesion(false);
+      return;
+    }
+    peticionApi<LoginResponseDTO>("/auth/refresh", {
+      method: "POST",
+      body: { refreshToken: refreshTokenGuardado },
+    })
+      .then((respuesta) => {
+        guardarRefreshToken(respuesta.refreshToken);
+        setAccessToken(respuesta.accessToken);
+      })
       .catch(() => setAccessToken(null))
       .finally(() => setCargandoSesion(false));
   }, []);
@@ -44,19 +68,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [accessToken]);
 
   async function login(email: string, password: string): Promise<void> {
-    const respuesta = await peticionApi<LoginResponse>("/auth/login", {
+    const respuesta = await peticionApi<LoginResponseDTO>("/auth/login", {
       method: "POST",
       body: { email, password },
     });
+    guardarRefreshToken(respuesta.refreshToken);
     setAccessToken(respuesta.accessToken);
   }
 
   async function logout(): Promise<void> {
-    // Necesario de verdad, no un simple "olvidar el token": borra la cookie
-    // httpOnly de refresco en el servidor. Sin esto, un F5 tras "Salir"
-    // volvería a iniciar sesión solo con la cookie todavía viva.
+    // No hay nada que invalidar en el servidor (JWT sin estado) — basta con
+    // olvidar el refresh token localmente para que ni un F5 recupere sesión.
     try {
-      await peticionApi("/auth/logout", { method: "POST" });
+      localStorage.removeItem(CLAVE_REFRESH_TOKEN);
     } finally {
       setAccessToken(null);
     }

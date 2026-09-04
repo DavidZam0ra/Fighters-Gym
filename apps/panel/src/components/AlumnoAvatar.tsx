@@ -12,8 +12,12 @@ function iniciales(seed: string): string {
 
 /** Avatar determinista por alumno (mismo seed = mismo personaje siempre) —
  * dirección confirmada para la app real, no las iniciales que se usaban antes.
- * Si la petición a DiceBear falla (red del móvil, timeout, etc.) cae a un
- * círculo con las iniciales del seed en vez del icono de imagen rota. */
+ * `loading="lazy"` es importante aquí: con listas de 200+ alumnos, pedir a
+ * DiceBear todas las imágenes de golpe al cargar la pantalla es lo que hacía
+ * fallar las últimas filas en redes móviles — así el navegador solo pide la
+ * imagen cuando la fila está a punto de entrar en pantalla.
+ * Si aun así la petición a DiceBear falla (red del móvil, timeout, etc.) cae
+ * a un círculo con las iniciales del seed en vez del icono de imagen rota. */
 export function AlumnoAvatar({ seed, size = 36 }: { seed: string; size?: number }) {
   const [fallo, setFallo] = useState(false);
   const url = `${API_DICEBEAR}?seed=${encodeURIComponent(seed)}`;
@@ -37,6 +41,7 @@ export function AlumnoAvatar({ seed, size = 36 }: { seed: string; size?: number 
       alt=""
       className="alumno-avatar"
       style={{ width: size, height: size }}
+      loading="lazy"
       onError={() => setFallo(true)}
     />
   );

@@ -1,21 +1,23 @@
-import type { FastifyInstance, FastifyReply } from "fastify";
+import type { FastifyInstance } from "fastify";
 import type { LoginResponseDTO } from "@fighters-gym/shared-types";
-import { loginSchema } from "../schemas/auth.schemas.js";
+import { loginSchema, refreshSchema } from "../schemas/auth.schemas.js";
 import { CredencialesInvalidasError } from "../../../application/use-cases/auth/LoginUseCase.js";
 import { RefreshTokenInvalidoError } from "../../../application/use-cases/auth/RefrescarTokenUseCase.js";
 import type { Container } from "../../../composition-root/container.js";
 
-const NOMBRE_COOKIE_REFRESH = "refresh_token";
-const SEGUNDOS_REFRESH = 30 * 24 * 60 * 60;
-
+// El refresh token viaja en el body (no en una cookie httpOnly): panel y API
+// son subdominios de onrender.com, que está en la Public Suffix List, así
+// que el navegador los trata como sitios distintos — Safari/iOS bloquea por
+// defecto las cookies de terceros y la sesión no sobrevivía en la PWA
+// instalada en el móvil. El propio panel guarda el refresh token en
+// localStorage y lo reenvía explícito en cada /auth/refresh.
 export function registrarRutasAuth(app: FastifyInstance, container: Container): void {
   app.post("/auth/login", async (request, reply) => {
     const datos = loginSchema.parse(request.body);
 
     try {
       const tokens = await container.loginUseCase.ejecutar(datos);
-      fijarCookieRefresh(reply, tokens.refreshToken);
-      const respuesta: LoginResponseDTO = { accessToken: tokens.accessToken };
+      const respuesta: LoginResponseDTO = tokens;
       return respuesta;
     } catch (error) {
       if (error instanceof CredencialesInvalidasError) {
@@ -26,15 +28,11 @@ export function registrarRutasAuth(app: FastifyInstance, container: Container): 
   });
 
   app.post("/auth/refresh", async (request, reply) => {
-    const refreshToken = request.cookies[NOMBRE_COOKIE_REFRESH];
-    if (refreshToken === undefined) {
-      return reply.code(401).send({ error: "No hay sesión activa." });
-    }
+    const { refreshToken } = refreshSchema.parse(request.body);
 
     try {
       const tokens = await container.refrescarTokenUseCase.ejecutar(refreshToken);
-      fijarCookieRefresh(reply, tokens.refreshToken);
-      const respuesta: LoginResponseDTO = { accessToken: tokens.accessToken };
+      const respuesta: LoginResponseDTO = tokens;
       return respuesta;
     } catch (error) {
       if (error instanceof RefreshTokenInvalidoError) {
@@ -42,23 +40,5 @@ export function registrarRutasAuth(app: FastifyInstance, container: Container): 
       }
       throw error;
     }
-  });
-
-  app.post("/auth/logout", async (_request, reply) => {
-    // El logout real pasa por aquí: borrar la cookie httpOnly en el servidor.
-    // Si solo se olvidara el access token en el cliente, la cookie de
-    // refresco seguiría viva y un simple F5 volvería a iniciar sesión solo.
-    reply.clearCookie(NOMBRE_COOKIE_REFRESH, { path: "/auth" });
-    return reply.code(204).send();
-  });
-}
-
-function fijarCookieRefresh(reply: FastifyReply, valor: string): void {
-  reply.setCookie(NOMBRE_COOKIE_REFRESH, valor, {
-    httpOnly: true,
-    secure: true,
-    sameSite: "none",
-    path: "/auth",
-    maxAge: SEGUNDOS_REFRESH,
   });
 }

@@ -1,6 +1,5 @@
 import { describe, expect, it } from "vitest";
 import Fastify, { type FastifyInstance } from "fastify";
-import cookie from "@fastify/cookie";
 import multipart from "@fastify/multipart";
 import { registrarManejadorErrores } from "../errorHandler.js";
 import { registrarRutasAuth } from "../routes/auth.routes.js";
@@ -101,7 +100,6 @@ async function construirApp(): Promise<{
 
   const app = Fastify();
   registrarManejadorErrores(app);
-  await app.register(cookie);
   await app.register(multipart);
   registrarRutasAuth(app, container);
   registrarRutasAlumnos(app, container);
@@ -116,7 +114,7 @@ async function construirApp(): Promise<{
 }
 
 describe("POST /auth/login", () => {
-  it("devuelve un accessToken y fija la cookie de refresco con credenciales correctas", async () => {
+  it("devuelve accessToken y refreshToken con credenciales correctas", async () => {
     const { app } = await construirApp();
 
     const respuesta = await app.inject({
@@ -127,7 +125,7 @@ describe("POST /auth/login", () => {
 
     expect(respuesta.statusCode).toBe(200);
     expect(respuesta.json().accessToken).toBe("access:usuario-1");
-    expect(respuesta.cookies.some((c) => c.name === "refresh_token")).toBe(true);
+    expect(respuesta.json().refreshToken).toBe("refresh:usuario-1");
   });
 
   it("rechaza credenciales incorrectas con 401", async () => {
@@ -156,13 +154,11 @@ describe("POST /auth/login", () => {
 });
 
 describe("POST /auth/refresh", () => {
-  it("responde 401, no 500, cuando no hay cookie de sesión", async () => {
+  it("responde 400, no 500, con un cuerpo vacío", async () => {
+    // Regresión: el panel llama a /auth/refresh al arrancar. Un cuerpo
+    // inválido/vacío debe traducirse a un 4xx normal, no a un 500 genérico.
     const { app } = await construirApp();
 
-    // Regresión: el panel llama a /auth/refresh al arrancar, sin cuerpo,
-    // pero con Content-Type: application/json — Fastify trata eso como un
-    // error de parseo (cuerpo vacío) que el errorHandler debe traducir a un
-    // 4xx normal, no a un 500 genérico.
     const respuesta = await app.inject({
       method: "POST",
       url: "/auth/refresh",
@@ -173,17 +169,19 @@ describe("POST /auth/refresh", () => {
     expect(respuesta.statusCode).toBe(400);
   });
 
-  it("responde 401 cuando la cookie de refresco no existe", async () => {
+  it("responde 401 cuando el refreshToken no es válido", async () => {
     const { app } = await construirApp();
 
-    const respuesta = await app.inject({ method: "POST", url: "/auth/refresh" });
+    const respuesta = await app.inject({
+      method: "POST",
+      url: "/auth/refresh",
+      payload: { refreshToken: "esto-no-es-un-token-valido" },
+    });
 
     expect(respuesta.statusCode).toBe(401);
   });
-});
 
-describe("POST /auth/logout", () => {
-  it("borra la cookie de refresco en el servidor, no solo el token en el cliente", async () => {
+  it("devuelve un nuevo accessToken y refreshToken con uno válido", async () => {
     const { app } = await construirApp();
 
     const login = await app.inject({
@@ -191,23 +189,17 @@ describe("POST /auth/logout", () => {
       url: "/auth/login",
       payload: { email: EMAIL_ADMIN, password: PASSWORD_ADMIN },
     });
-    const cookieRefresh = login.cookies.find((c) => c.name === "refresh_token");
-    expect(cookieRefresh).toBeDefined();
+    const { refreshToken } = login.json();
 
-    const logout = await app.inject({ method: "POST", url: "/auth/logout" });
-    expect(logout.statusCode).toBe(204);
-    const cookieBorrada = logout.cookies.find((c) => c.name === "refresh_token");
-    // clearCookie vacía el valor y expira la cookie en el pasado.
-    expect(cookieBorrada?.value).toBe("");
-
-    // Regresión del bug real: tras "logout", un /auth/refresh con la cookie ya
-    // borrada no debe devolver una sesión nueva.
-    const refreshTrasLogout = await app.inject({
+    const respuesta = await app.inject({
       method: "POST",
       url: "/auth/refresh",
-      cookies: { refresh_token: cookieBorrada?.value ?? "" },
+      payload: { refreshToken },
     });
-    expect(refreshTrasLogout.statusCode).toBe(401);
+
+    expect(respuesta.statusCode).toBe(200);
+    expect(respuesta.json().accessToken).toBe("access:usuario-1");
+    expect(respuesta.json().refreshToken).toBe("refresh:usuario-1");
   });
 });
 
